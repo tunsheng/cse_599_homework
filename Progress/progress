@@ -1,0 +1,29 @@
+1) Each backward should return a single array
+   Can optionaly implement INITIALIZE and SELFSTR
+
+2) NOTHING
+===========================================
+3.1) Linear Layer: DONE
+3.2.1) Numpy Relu: DONE
+3.2.2) Numba Relu: DONE
+
+4.1) Softmax Cross Entropy loss forward:
+4.2) Softmax cross entropy loss backward:
+4.3) sgd: DONE
+
+5.1) momentum sgd: DONE
+5.2) leaky relu: DONE
+5.3) prelu: DONE
+
+6) Complete MNIST training with PyTorch:
+
+7.1) Best slope for leaky relu:
+     Behavior for slope > 1:
+     Behavior for slope < 0:
+     Behavior for slope = 1:
+7.2) Set prelu to take 1 slope per layer
+     After 20 epochs, what were your prelu slopes = 
+     Does this correspond with what you found in 7.1 ?
+7.3) If you add more layers and more epochs, what accuracy = 
+     Can you get to 99% =
+     What is your best network layout =
