@@ -123,7 +123,8 @@ With this done, we can now train our first neural network! Open [hw1/main.py](hw
 Have a look at the pretty standard training loop. First, you get the data. Then you call the forward function on the network to get its outputs. Finally, you zero the previous gradients, call backward on the network, and update the weights.
 You can run it by calling
 ```bash
-python hw1/main.py
+cd hw1
+python main.py
 ```
 After 1 epoch, you should see about 70% test accuracy. After 10 epochs, you should see about 90% accuracy.
 
@@ -191,11 +192,12 @@ Answer these questions and save them in a file named `hw1/short_answer.pdf`.
 
 ## Turn it in ##
 
-First run the `submit.sh` script by running:
+First `cd` to the `hw1` directory. Then run the `submit.sh` script by running:
 
 ```bash
-bash hw1/submit.sh
+bash submit.sh
 ```
+
 This will create the file `submit.tar.gz` in your directory with all the code you need to submit. The command will check to see that your files have changed relative to the version stored in the `git` repository. If it hasn't changed, figure out why, maybe you need to download your ipynb from google?
 
 Submit `submit.tar.gz` in the file upload field for Homework 1 on Canvas.

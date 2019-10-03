@@ -1,3 +1,9 @@
+import sys
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
+
+
 import numpy as np
 import tqdm
 
@@ -77,12 +83,12 @@ if __name__ == "__main__":
     batch_size = 1000
     lr = 0.01
 
-    train_dataset = np.load("datasets/mnist/train.npz")
+    train_dataset = np.load("../datasets/mnist/train.npz")
     train_data = train_dataset["data"].astype(np.float32) / 255
     train_data = train_data.reshape(-1, 28 ** 2)
     train_labels = train_dataset["labels"]
 
-    test_dataset = np.load("datasets/mnist/test.npz")
+    test_dataset = np.load("../datasets/mnist/test.npz")
     test_data = test_dataset["data"].astype(np.float32) / 255
     test_data = test_data.reshape(-1, 28 ** 2)
     test_labels = test_dataset["labels"]

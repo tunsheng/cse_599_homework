@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-cd hw1
 rm -rf submit/
 mkdir -p submit
 
@@ -21,5 +20,4 @@ prepare partners.txt
 
 tar cvzf submit.tar.gz submit
 rm -rf submit/
-cd ..
 echo "Done. Please upload submit.tar.gz to Canvas."
