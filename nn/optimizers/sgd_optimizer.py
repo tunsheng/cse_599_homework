@@ -8,5 +8,6 @@ class SGDOptimizer(BaseOptimizer):
 
     def step(self):
         for parameter in self.parameters:
-            # TODO fix the line below to apply the parameter update
-            parameter.data = None
+            # 4.3) TODO fix the line below to apply the parameter update
+            # parameter.data = None
+            parameter.data -= self.learning_rate*parameter.grad

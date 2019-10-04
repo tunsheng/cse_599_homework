@@ -9,7 +9,7 @@ class LeakyReLULayer(Layer):
         self.slope = slope
 
     def forward(self, data):
-        # TODO
+        # 5.2) TODO
         # Store gradient f'(in) shape =  (n x d)
         self.slope.grad(map(lambda x: 1 if (x>0) else self.slope.data, data))
         #Return f(in) shape = (n x d)
@@ -17,7 +17,7 @@ class LeakyReLULayer(Layer):
 
 
     def backward(self, previous_partial_gradient):
-        # TODO
+        # 5.2) TODO
         # (n x c) x  (c x d) = (n x d)
         #  dy     dy          df(x)
         # ---- = --------- X ---------

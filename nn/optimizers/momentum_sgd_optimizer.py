@@ -11,5 +11,7 @@ class MomentumSGDOptimizer(BaseOptimizer):
 
     def step(self):
         for parameter in self.parameters:
-            # TODO update the parameters
-            pass
+            # 5.1) TODO update the parameters
+            dparameter = self.momentum*self.previous_deltas
+            dparameter += (parameter.grad+self.weight_decay*parameter.data)
+            parameter -= self.learning_rate*dparameter

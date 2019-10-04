@@ -15,7 +15,7 @@ class PReLULayer(Layer):
         pass
 
     def forward(self, data):
-        # TODO
+        # 5.2) TODO
         m,n = data.shape
         output = np.copy(data)
         output = output.flatten()
@@ -32,7 +32,7 @@ class PReLULayer(Layer):
         return output
 
     def backward(self, previous_partial_gradient):
-        # TODO
+        # 5.2) TODO
         return np.matmul(previous_partial_gradient, np.transpose(self.slope.grad))
 
 
