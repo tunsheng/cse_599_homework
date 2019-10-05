@@ -28,38 +28,35 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
         # 4.1) TODO
         # :param logtis: n X d array (batch x features)
         # :param targets: n  array (batch )
-        dimAxis = logits.shape
-        print("Logits = ", dimAxis)
-        print("targets = ", targets.shape)
-        print("Axis = ", axis)
+        dimInput = logits.shape
         # https://deepnotes.io/softmax-crossentropy
-        b = np.max(logits, axis=axis)  # Max of each row
-        # x = np.array([ logits[i,:]-b[i] for i in range(dimAxis[0]) ])
-        if (self.reduction=="mean"):
-            x = np.mean(logits, axis=axis)
-        else:
-            x = np.sum(logits, axis=axis)
-        print("x = ", x.shape)
-        normalization = np.sum(np.exp(x))
-        print("Normalization = ", normalization)
+        b = np.max(logits, axis=1)  # Max of each row
+        logSoftMax = np.zeros(dimInput)
+        logLikelihood = np.zeros([dimInput[0]])
+        for i in range(dimInput[0]):
+            x = logits[i,:] - b[i]
+            logSoftMax[i,:] = x - np.log(np.sum(np.exp(x)))
+            logLikelihood[i] = -logSoftMax[i, targets[i]]
 
-        logSoftMax = x - np.log(normalization)
-        print("logSoftMax = ", logSoftMax.shape)
-        print("target type = ", targets.dtype)
-        logLikelihood=-logSoftMax[targets]
-        print("logLikelihood = ", logLikelihood.shape)
-        loss = np.sum(logLikelihood)/targets.shape[0]
-        print("Loss = ", loss)
-        # logitsReduced = np.delete(logits, np.arange(0, dimAxis[axis]-1),
-        #                             axis=axis)
+        # https://pytorch.org/docs/stable/nn.html?highlight=cross%20entropy#torch.nn.CrossEntropyLoss
+        if (reduction=='mean'):
+            # 'Default mean'
+            batchLoss = np.sum(logLikelihood)
+        elif (reduction=='sum'):
+            batchLoss = np.sum(logLikelihood)/dimInput[0]
+        else:
+            # Unreduced
+            batchLoss = logLikelihood
 
         # REMINDER: Next is to fix gradient
         grad = np.exp(logSoftMax)
-        grad[range(targets.shape[0], targets)] -= 1
-        grad /= targets.shape[0]
+        # for i in range(dimInput[0]):
+        #     grad[i, targets[i]] -= 1.0
+        grad[np.arange(targets.shape[0]), targets] -= 1.0
+        grad /=dimInput[0] # Must have this
         self.grad = grad
 
-        return loss
+        return batchLoss
 
     def backward(self) -> np.ndarray:
         """
@@ -67,6 +64,4 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
         :return: gradients wrt the logits the same shape as the input logits
         """
         # 4.2) TODO
-
-
         return self.grad
