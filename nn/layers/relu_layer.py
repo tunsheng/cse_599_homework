@@ -8,19 +8,34 @@ class ReLULayer(Layer):
     def __init__(self, parent=None):
         super(ReLULayer, self).__init__(parent)
         self.grad = 0
+        # self.relu = np.vectorize(lambda x: x if (x>0) else 0)
+        # self.drelu = np.vectorize(lambda x: 1 if (x>0) else 0)
+        self.relu = np.vectorize(lambda x: x * (x>0))
+        self.drelu = np.vectorize(lambda x: 1.0 * (x>0))
+        self.input = 0
 
     def forward(self, data):
         # TODO
-        #Return f(in) shape = (n x d)
-
-        relu = np.vectorize(lambda x: x if (x>0) else 0)
-        drelu = np.vectorize(lambda x: 1 if (x>0) else 0)
-        self.grad = drelu(data)
-        return relu(data)
+        # Element-wise function
+        # Return f(in) shape = (n x d)
+        # self.grad=(data>=0)
+        # self.grad=self.drelu(data)
+        self.input = data
+        return self.relu(data)
 
     def backward(self, previous_partial_gradient):
         # TODO
-        return np.matmul(previous_partial_gradient, np.transpose(self.grad))
+        if (False):
+            print("RELU Layer")
+            print("Prev grad = ", previous_partial_gradient.shape)
+            print("Grad Weight = ", np.transpose(self.grad).shape)
+            print("\n")
+        #  dy     dy        df(z)
+        # ---- = ------- X -------
+        #  dz     df(z)     dz
+        # new_grad = dy/df(in) * df(in)/d(in)
+        return previous_partial_gradient*(self.input >=0)
+        # return np.multiply(previous_partial_gradient, self.grad)
 
     # def selfstr(self):
     #     return str(self.grad.shape)
@@ -33,6 +48,7 @@ class ReLUNumbaLayer(Layer):
     @njit(parallel=True, cache=True)
     def forward_numba(data):
         # 3.2) TODO
+        print("Running Numba\n")
         output = np.copy(data)
         output = output.flatten()
         relu = np.vectorize(lambda x: x if (x>0) else 0)
@@ -53,6 +69,7 @@ class ReLUNumbaLayer(Layer):
     @njit(parallel=True, cache=True)
     def backward_numba(data, grad):
         # 3.2) TODO
+        print("Numba relu grad = ", grad.shape)
         output = np.zeros(data.shape)
         output = output.flatten()
         drelu = np.vectorize(lambda x: 1 if (x>0) else 0)

@@ -10,4 +10,5 @@ class SGDOptimizer(BaseOptimizer):
         for parameter in self.parameters:
             # 4.3) TODO fix the line below to apply the parameter update
             # parameter.data = None
+            # print("Grad = ", parameter.grad)
             parameter.data -= self.learning_rate*parameter.grad
