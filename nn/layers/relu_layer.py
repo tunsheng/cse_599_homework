@@ -30,10 +30,9 @@ class ReLULayer(Layer):
         #  dz     df(z)     dz
         # new_grad = dy/df(in) * df(in)/d(in)
         return previous_partial_gradient*(self.input >=0)
-        # return np.multiply(previous_partial_gradient, self.grad)
 
-    # def selfstr(self):
-    #     return str(self.grad.shape)
+    def selfstr(self):
+        return str(self.grad.shape)
 
 class ReLUNumbaLayer(Layer):
     def __init__(self, parent=None):
@@ -44,15 +43,13 @@ class ReLUNumbaLayer(Layer):
     @njit(parallel=True, cache=True)
     def forward_numba(data):
         # 3.2) TODO
-        print("Running Numba\n")
+        shape = data.shape
         output = np.copy(data)
         output = output.flatten()
-        relu = np.vectorize(lambda x: x if (x>0) else 0)
-        drelu = np.vectorize(lambda x: 1 if (x>0) else 0)
-        output = relu(output)
-        # for i in range(len(output)):
-        #     if (output[i] <  0 ):
-        #         output[i]=0
+        for i in prange(len(output)):
+            if (output[i]<0):
+                output[i]=0
+        output = output.reshape(shape)
         output = output.reshape(data.shape)
         return output
 
@@ -66,13 +63,17 @@ class ReLUNumbaLayer(Layer):
     @njit(parallel=True, cache=True)
     def backward_numba(data, grad):
         # 3.2) # TODO Helper function for computing ReLU gradients
-        print("Numba relu grad = ", grad.shape)
-        output = np.zeros(data.shape)
+        shape = data.shape
+        output = np.zeros(shape)
+        data = data.flatten()
         output = output.flatten()
-        drelu = np.vectorize(lambda x: 1 if (x>0) else 0)
-        output = drelu(output)
-        output = output.reshape(data.shape)
-        grad = output
+        grad = grad.flatten()
+        for i in prange(len(output)):
+            if (data[i]>0):
+                output[i]=grad[i]
+        output = output.reshape(shape)
+        data = data.reshape(shape)
+        grad = grad.reshape(shape)
         return output
 
     def backward(self, previous_partial_gradient):
