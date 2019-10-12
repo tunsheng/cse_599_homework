@@ -28,6 +28,83 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
         # 4.1) TODO
         # :param logtis: n X d array (batch x features)
         # :param targets: n  array (batch )
+<<<<<<< HEAD
+        # logits: n x d
+        # targets:  n -> (0 to d)
+        # grad: n x d
+        # loss: n
+        # batchLoss: 1
+        # b: n x 1
+        # CrossEntropy, E = - sum^{nclass} [ target_i * log(predict_i) ]
+        # dE/d(predict_i) = - [ target_i / predict_i ]
+
+
+        """
+        Computes softmax cross entropy between logits and label.
+        A common use is to have logits and labels of shape
+        [batch_size, num_classes] but higher dimensions are
+        supported with the axis argument specifying the class
+        dimension.
+
+        Backprop will happen into both logits and labels.
+        To disallow backprop into labels, pass label tensors
+        through tf.stop_gradient before feeding it to this
+        function.
+
+        labels: Each vector along the class dimension should
+                hold a valid probability distribution
+        logits: Unscaled log probabilities
+        axis:   The class dimension: default -1
+
+        Return: Same shape as labels except that it does not
+                have the last dimension of labels
+        """
+        # Save original shape
+        logits_shape_before = logits.shape
+        targets_shape = targets.shape
+
+        if axis != -1:
+            # Move `axis` dimension to the end
+            logits = np.moveaxis(logits, axis, -1)
+
+        logits_shape_moveaxis = logits.shape
+
+        # Make logits and labels into matrices
+        logits = self.flatten_outer_dims(logits)
+        logits_shape_flatten = logits.shape
+        targets = targets.flatten()
+        labels = self.one_hot_encode(targets, logits_shape_flatten)
+
+        # Start actual computation
+        b = np.max(logits, axis=-1)
+        loss=np.zeros([logits_shape_flatten[0], 1]) # n x 1
+        grad=np.zeros(logits_shape_flatten) # n x d
+        for i in range(logits_shape_flatten[0]):
+            summation = np.sum(np.exp(logits[i,:]-b[i]))
+            loglikelihood = (logits[i,:]-b[i])-np.log(summation)
+            loss[i] = -np.dot(loglikelihood, labels[i,:])
+
+            grad[i, :] = np.exp(loglikelihood)
+            grad[i, targets[i]] -= 1
+
+        if (self.reduction=="mean"):# Sum across batch
+            batchLoss=np.mean(loss)
+            self.grad = grad/logits_shape_flatten[0]
+        else:
+            batchLoss = np.sum(loss)
+            self.grad = grad
+
+        if axis != -1: # Deflat flatten matrix
+            logits = self.deflat_dims(logits, logits_shape_moveaxis)
+            self.grad = self.deflat_dims(self.grad, logits_shape_moveaxis)
+
+            # Move `axis` dimension to the end
+            logits = np.moveaxis(logits, -1, axis)
+            self.grad = np.moveaxis(self.grad, -1, axis)
+
+        # print(logits.shape)
+        # print(logits_shape_before)
+=======
         dimInput = logits.shape
         # https://deepnotes.io/softmax-crossentropy
         b = np.max(logits, axis=1)  # Max of each row
@@ -56,6 +133,7 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
         grad /=dimInput[0] # Must have this
         self.grad = grad
 
+>>>>>>> 51143ece6f951518363f24ae28a512b026a8c3f1
         return batchLoss
 
     def backward(self) -> np.ndarray:
@@ -65,3 +143,29 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
         """
         # 4.2) TODO
         return self.grad
+<<<<<<< HEAD
+
+    def flatten_outer_dims(self, tensor):
+        # Converts (500,100,200) to (50000,200)
+        return tensor.reshape(-1, tensor.shape[-1])
+
+    def deflat_dims(self, tensor, shape):
+        return tensor.reshape(shape)
+
+    def one_hot_encode(self, indices, shape):
+        """
+            Convert indices to 1-hot vector
+            indices: 1-d array of indices
+            shape:   [len of indices, num_classes]
+        """
+        output = np.zeros(shape)
+        output[np.arange(len(indices)), indices] = 1
+        return output
+
+    # def log_soft_max(self, x, b=0):
+    #     def log_soft_max_helper(x, b=0):
+    #         return (x-b)-np.sum(np.exp(x-b))
+    #     output = np.vectorize(log_soft_max_helper)
+    #     return log_soft_max_helper
+=======
+>>>>>>> 51143ece6f951518363f24ae28a512b026a8c3f1
