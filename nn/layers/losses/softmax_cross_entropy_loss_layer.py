@@ -70,36 +70,6 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
             logits = np.moveaxis(logits, -1, axis)
             self.grad = np.moveaxis(self.grad, -1, axis)
 
-        # print(logits.shape)
-        # print(logits_shape_before)
-
-        dimInput = logits.shape
-        # https://deepnotes.io/softmax-crossentropy
-        b = np.max(logits, axis=1)  # Max of each row
-        logSoftMax = np.zeros(dimInput)
-        logLikelihood = np.zeros([dimInput[0]])
-        for i in range(dimInput[0]):
-            x = logits[i,:] - b[i]
-            logSoftMax[i,:] = x - np.log(np.sum(np.exp(x)))
-            logLikelihood[i] = -logSoftMax[i, targets[i]]
-
-        # https://pytorch.org/docs/stable/nn.html?highlight=cross%20entropy#torch.nn.CrossEntropyLoss
-        if (reduction=='mean'):
-            # 'Default mean'
-            batchLoss = np.sum(logLikelihood)
-        elif (reduction=='sum'):
-            batchLoss = np.sum(logLikelihood)/dimInput[0]
-        else:
-            # Unreduced
-            batchLoss = logLikelihood
-
-        # REMINDER: Next is to fix gradient
-        grad = np.exp(logSoftMax)
-        # for i in range(dimInput[0]):
-        #     grad[i, targets[i]] -= 1.0
-        grad[np.arange(targets.shape[0]), targets] -= 1.0
-        grad /=dimInput[0] # Must have this
-        self.grad = grad
 
         return batchLoss
 

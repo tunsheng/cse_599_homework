@@ -10,9 +10,11 @@ class MomentumSGDOptimizer(BaseOptimizer):
         self.previous_deltas = [0] * len(parameters)
 
     def step(self):
+        counter=0
         for parameter in self.parameters:
             # 5.1) TODO update the parameters
-            self.previous_deltas = parameter.grad
-            dparameter = self.momentum*self.previous_deltas
+            dparameter = self.momentum*self.previous_deltas[counter]
             dparameter += (parameter.grad+self.weight_decay*parameter.data)
+            self.previous_deltas[counter]=dparameter # Save current gradient
             parameter.data -= self.learning_rate*dparameter
+            counter+=1
