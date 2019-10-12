@@ -9,9 +9,20 @@ You will train a classifier on MNIST, a common image dataset on hand-written num
 In the PyTorch part, you will visualize some of these numbers if you have never seen them before. 
 It's actually pretty impressive that we can make a neural net that reads handwriting.
 
+We have provided some tests for checking your implementation. The tests are intentionally missing some cases, but feel free to write more tests yourself.
+To run the tests from the outermost directory, simply run
+```bash
+pytest test/hw1_tests
+```
+Or to run them for an individual file (for example test_linear_layer), run
+```bash
+pytest test/hw1_tests/test_linear_layer.py
+```
+
 ## Rules ##
 1. You may not use PyTorch or any other deep learning package in parts 1-5 of the homework. Only Numpy and Numba are allowed. Functions like numpy.matmul are fine to use.
 1. You may only modify the files we mention (those in the [submit.sh](submit.sh) script). We will not grade files outside of these.
+1. You may not change the signatures or return types of `__init__`, `forward`, `backward`, or `step` in the various parts or you will fail our tests. You may add object fields (e.g. `self.data`) or helper functions within the files.
 1. Undergrads partners only need to turn in a single homework, but you must put both partner's NetIDs in partners.txt comma separated on a single line.
     Example: `studenta,studentb`
 1. You may talk with others about the homework, but you must implement by yourself (except partners).
@@ -83,7 +94,7 @@ Because we are using the Softmax function, we can prove that these two inputs sh
 = \frac{ \exp(x_i - b) }{ \sum_{j=1}^n \exp(x_j - b) }
 ```
 
-By combining the Softmax and the Cross Entropy, we can actually implement a more stable loss as well. First we will implement Log Softmax.
+By combining the Softmax and the Cross Entropy, we can actually implement a more stable loss as well. First we will implement Log Softmax (n is the size of the label dimension).
 ```math
 \begin{aligned}
 \log\left(\frac{e^{x_j}}{\sum_{i=1}^{n} e^{x_i}}\right) &= \log(e^{x_j}) - \log\left(\sum_{i=1}^{n} e^{x_i}\right) \\
@@ -98,7 +109,8 @@ H(p,q) = -\sum_{i=1}^n p(i) log(q(x_i))
 Where $`p(i)`$ is the label probability and $`log(q(x_i))`$ is the Log Softmax of the inputs. Since the probabilities are actually input as target integers, the probabilities will be a one-hot encoding of those targets. 
 Alternatively, you can use the target integers as indices from the Log Softmax array. Finally, be sure to implement both `mean` and `sum` reduction.
 
-For the first homework, you can expect the input to be 2D (batch x class) and the label to be 1D (batch). However you will get bonus points if you correctly implement it for arbitrary dimensions (warning, harder than it sounds).
+For the first homework, you can expect the input to be 2D (batch x class) and the label to be 1D (batch). However you will get bonus points if you correctly implement it for arbitrary dimensions (warning, harder than it sounds). 
+Hint: use numpy moveaxis and reshape to put the class dimension at the end and convert it to (batch x class), then undo after the computations.
 
 ### 4.2 Softmax Cross Entropy Loss Backward ###
 Since the output of the forward function should be a float, the backward won't take any arguments. Instead, you should use some class variables to store relavent values from the forward pass in order to use them in the backward pass.
@@ -160,13 +172,16 @@ The MomentumSGDOptimizer class will need to keep a history of the previous chang
 Using momentum should give significantly faster and better convergence. After a single epoch, you should see about 90% accuracy. After 10 epochs, you should see about 95% accuracy.
 
 ### 5.2 Leaky ReLU Layer ###
-Implement the Leaky ReLU function `LeakyReLU(x) = x if x > 0, slope * x if x <= 0`. Again, we will define the gradient to be 0 at 0. 
+Implement the Leaky ReLU function `LeakyReLU(x) = x if x > 0, slope * x if x <= 0`. We will define the gradient at 0 to be like the negative half. 
+(Note, we know we changed this from what it originally said. If you already implemented the version we originally said, you will pass our tests, but this new version is more correct).
 
 You may see LeakyReLU defined in other places as `LeakyReLU(x) = max(x, slope * x)` but what happens if slope is > 1 or negative? Be careful of this trap in your implementation.
 You can implement this using either Numpy or Numba, whichever you find easier. 
 
 ### 5.3 Parameterized ReLU (PReLU) Layer ###
-Implement the PReLU function where the leaky slope is a learned parameter. Again, we will define the gradient to be 0 at 0.
+Implement the PReLU function where the leaky slope is a learned parameter. Again, we will define the gradient at 0 to be like the negative half. 
+(Note, we know we changed this from what it originally said. If you already implemented the version we originally said, you will pass our tests, but this new version is more correct).
+
 
 For more information, see https://arxiv.org/pdf/1502.01852.pdf
 
@@ -180,7 +195,7 @@ However we will give +1 extra credit (and +1 deep learning street cred) if you s
 ## 6. PyTorch ##
 Navigate to: https://colab.research.google.com/
 
-and upload the iPython notebook provided: `mnist_pytorch.ipynb`
+and upload the iPython notebook provided: `homework1_colab.ipynb`
 
 Complete the notebook to train a PyTorch model on the MNIST dataset.
 

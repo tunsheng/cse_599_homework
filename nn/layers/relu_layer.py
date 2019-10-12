@@ -3,13 +3,10 @@ from numba import njit, prange
 
 from .layer import Layer
 
-
 class ReLULayer(Layer):
     def __init__(self, parent=None):
         super(ReLULayer, self).__init__(parent)
         self.grad = 0
-        # self.relu = np.vectorize(lambda x: x if (x>0) else 0)
-        # self.drelu = np.vectorize(lambda x: 1 if (x>0) else 0)
         self.relu = np.vectorize(lambda x: x * (x>0))
         self.drelu = np.vectorize(lambda x: 1.0 * (x>0))
         self.input = 0
@@ -18,8 +15,6 @@ class ReLULayer(Layer):
         # TODO
         # Element-wise function
         # Return f(in) shape = (n x d)
-        # self.grad=(data>=0)
-        # self.grad=self.drelu(data)
         self.input = data
         return self.relu(data)
 
@@ -43,6 +38,7 @@ class ReLULayer(Layer):
 class ReLUNumbaLayer(Layer):
     def __init__(self, parent=None):
         super(ReLUNumbaLayer, self).__init__(parent)
+        self.data = None
 
     @staticmethod
     @njit(parallel=True, cache=True)
@@ -62,26 +58,24 @@ class ReLUNumbaLayer(Layer):
 
     def forward(self, data):
         # Modify if you want
+        self.data = data
         output = self.forward_numba(data)
         return output
 
     @staticmethod
     @njit(parallel=True, cache=True)
     def backward_numba(data, grad):
-        # 3.2) TODO
+        # 3.2) # TODO Helper function for computing ReLU gradients
         print("Numba relu grad = ", grad.shape)
         output = np.zeros(data.shape)
         output = output.flatten()
         drelu = np.vectorize(lambda x: 1 if (x>0) else 0)
         output = drelu(output)
-        # for i in range(len(output)):
-        #     if (output[i] <  0 ):
-        #         output[i]=0
-        #     else:
-        #         output[i]=1
         output = output.reshape(data.shape)
         grad = output
         return output
 
     def backward(self, previous_partial_gradient):
-        return None
+        # TODO
+        output=self.backward_numba(self.data, previous_partial_gradient)
+        return output

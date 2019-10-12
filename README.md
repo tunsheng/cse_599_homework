@@ -11,9 +11,9 @@ If you are not familiar with them, take a few minutes to learn the ins and outs.
 First install Miniconda (https://docs.conda.io/en/latest/miniconda.html). Then run the following commands.
 
 ```bash
-conda create -n dl-class python=3.6
-git clone git@gitlab.com:danielgordon10/dl-class-2019a.git
-cd dl-class
+conda create -n dl-class python=3.6.9
+git clone https://gitlab.com/danielgordon10/dl-class-2019a.git
+cd dl-class-2019a
 conda deactivate
 conda env update -n dl-class -f environment.yml
 conda activate dl-class

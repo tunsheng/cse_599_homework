@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from typing import Callable, List, Iterable, Dict, Optional, Union
+from typing import Callable, List, Tuple, Iterable, Dict, Optional, Union
 
 import numpy as np
 
@@ -16,34 +16,45 @@ def normals_initializer(parameter: Parameter):
 
 
 class Layer(object):
-    def __init__(self, parent: Optional[Union["Layer", List["Layer"]]] = None):
-        self.parent = parent
+    def __init__(self, parent: Optional[Union["Layer", Tuple["Layer"]]] = None):
+        self._parent = parent
         assert (
-            self.parent is None or isinstance(self.parent, Layer) or isinstance(self.parent, List)
-        ), "Parents must be a Layer, a list of Layers, or None"
+            self.parent is None or isinstance(self.parent, Layer) or isinstance(self.parent, Tuple)
+        ), "Parents must be a Layer, a list/tuple of Layers, or None"
 
     @property
     def name(self) -> str:
         return type(self).__name__
 
     @property
-    def parents(self) -> Optional[List["Layer"]]:
+    def parent(self) -> Optional[Union[Tuple["Layer"], "Layer"]]:
+        return self._parent
+
+    @parent.setter
+    def parent(self, val: Union[Tuple["Layer"], "Layer"]):
+        self.set_parent(val)
+
+    def set_parent(self, val):
+        self._parent = val
+
+    @property
+    def parents(self) -> Optional[Tuple["Layer"]]:
         if self.parent is None:
             return None
-        if isinstance(self.parent, List):
+        if isinstance(self.parent, Tuple):
             return self.parent
         else:
-            return [self.parent]
+            return (self.parent,)
 
     def forward(self, *args, **kwargs) -> np.ndarray:
         raise NotImplementedError
 
-    def backward(self, *args, **kwargs) -> Union[np.ndarray, List[np.ndarray]]:
+    def backward(self, *args, **kwargs) -> np.ndarray:
         raise NotImplementedError
 
     def vars(self):
         for obj, val in vars(self).items():
-            if obj == "parent":
+            if obj == "_parent":
                 continue
             yield (obj, val)
 
@@ -64,6 +75,11 @@ class Layer(object):
             if isinstance(val, Layer):
                 yield val
 
+    def child_layers(self):
+        for obj, val in self.vars():
+            if isinstance(val, Layer):
+                yield val
+
     def own_parameters(self) -> Iterable[Parameter]:
         params = []
         for obj, val in self.vars():
@@ -72,12 +88,11 @@ class Layer(object):
         return params
 
     def initialize(self, initializer: Optional[Callable[[Parameter], None]] = None):
-        if initializer is None:
-            initializer = normals_initializer
-        for child in self.children():
-            child.initialize(initializer)
-        for param in self.own_parameters():
-            initializer(param)
+        if initializer is not None:
+            for param in self.own_parameters():
+                initializer(param)
+        for val in self.child_layers():
+            val.initialize()
 
     def selfstr(self) -> str:
         """

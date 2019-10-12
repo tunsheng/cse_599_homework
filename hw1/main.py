@@ -3,7 +3,6 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir))
 
-
 import numpy as np
 import tqdm
 
@@ -37,7 +36,6 @@ class MNISTNetwork(Network):
 def train(train_data, train_labels, test_data, test_labels, optimizer_type="sgd"):
     network = MNISTNetwork()
     print(network)
-    network.initialize()
     if optimizer_type == "sgd":
         optimizer = SGDOptimizer(network.parameters(), lr)
     elif optimizer_type == "momentum":
@@ -93,4 +91,4 @@ if __name__ == "__main__":
     test_data = test_data.reshape(-1, 28 ** 2)
     test_labels = test_dataset["labels"]
 
-    train(train_data, train_labels, test_data, test_labels, "sgd")
+    train(train_data, train_labels, test_data, test_labels, "momentum")
