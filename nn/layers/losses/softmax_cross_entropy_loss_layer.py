@@ -26,39 +26,7 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
         :return:       single float of the loss.
         """
         # 4.1) TODO
-        # :param logtis: n X d array (batch x features)
-        # :param targets: n  array (batch )
-<<<<<<< HEAD
-        # logits: n x d
-        # targets:  n -> (0 to d)
-        # grad: n x d
-        # loss: n
-        # batchLoss: 1
-        # b: n x 1
-        # CrossEntropy, E = - sum^{nclass} [ target_i * log(predict_i) ]
-        # dE/d(predict_i) = - [ target_i / predict_i ]
 
-
-        """
-        Computes softmax cross entropy between logits and label.
-        A common use is to have logits and labels of shape
-        [batch_size, num_classes] but higher dimensions are
-        supported with the axis argument specifying the class
-        dimension.
-
-        Backprop will happen into both logits and labels.
-        To disallow backprop into labels, pass label tensors
-        through tf.stop_gradient before feeding it to this
-        function.
-
-        labels: Each vector along the class dimension should
-                hold a valid probability distribution
-        logits: Unscaled log probabilities
-        axis:   The class dimension: default -1
-
-        Return: Same shape as labels except that it does not
-                have the last dimension of labels
-        """
         # Save original shape
         logits_shape_before = logits.shape
         targets_shape = targets.shape
@@ -104,7 +72,7 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
 
         # print(logits.shape)
         # print(logits_shape_before)
-=======
+
         dimInput = logits.shape
         # https://deepnotes.io/softmax-crossentropy
         b = np.max(logits, axis=1)  # Max of each row
@@ -133,7 +101,6 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
         grad /=dimInput[0] # Must have this
         self.grad = grad
 
->>>>>>> 51143ece6f951518363f24ae28a512b026a8c3f1
         return batchLoss
 
     def backward(self) -> np.ndarray:
@@ -143,7 +110,6 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
         """
         # 4.2) TODO
         return self.grad
-<<<<<<< HEAD
 
     def flatten_outer_dims(self, tensor):
         # Converts (500,100,200) to (50000,200)
@@ -167,5 +133,3 @@ class SoftmaxCrossEntropyLossLayer(LossLayer):
     #         return (x-b)-np.sum(np.exp(x-b))
     #     output = np.vectorize(log_soft_max_helper)
     #     return log_soft_max_helper
-=======
->>>>>>> 51143ece6f951518363f24ae28a512b026a8c3f1

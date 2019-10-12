@@ -20,13 +20,10 @@ def _test_forward(input_shape, reduction, axis):
             utils.from_numpy(data.swapaxes(1, axis)), utils.from_numpy(labels), reduction=reduction
         )
     pytorch_loss = utils.to_numpy(pytorch_loss)
-    print("Your loss =", loss)
-    print("Pytorch =", pytorch_loss)
     assert np.allclose(loss, pytorch_loss, atol=0.001)
 
 
 def test_forward_easy():
-    print("Test easy")
     input_shape = (20, 10)
     _test_forward(input_shape, "mean", 1)
     _test_forward(input_shape, "sum", 1)
@@ -52,13 +49,11 @@ def _test_forward_overflow(input_shape, reduction, axis):
 
 def test_forward_overflow():
     input_shape = (20, 10)
-    print("Overflow")
     _test_forward_overflow(input_shape, "mean", 1)
     _test_forward_overflow(input_shape, "sum", 1)
 
 
 def test_forward_hard():
-    print("Forward hard")
     input_shape = (20, 10, 5)
     _test_forward(input_shape, "mean", 1)
     _test_forward(input_shape, "sum", 1)
@@ -90,23 +85,17 @@ def _test_backward(input_shape, reduction, axis):
     if axis != 1:
         torch_grad = np.moveaxis(torch_grad, 1, axis)
 
-    print("Your grad = ", grad[0])
-    print("Torch_grad = ", torch_grad[0])
-    print("Your grad = ", grad.shape)
-    print("Torch_grad = ", torch_grad.shape)
     assert np.allclose(grad, torch_grad, atol=0.001)
 
 
 def test_backward_easy():
     input_shape = (20, 10)
-    print("Backward easy")
     _test_backward(input_shape, "mean", 1)
     _test_backward(input_shape, "sum", 1)
 
 
 def test_backward_hard():
     input_shape = (20, 10, 5)
-    print("Backward hard")
     _test_backward(input_shape, "mean", 1)
     _test_backward(input_shape, "sum", 1)
     _test_backward(input_shape, "mean", 2)
