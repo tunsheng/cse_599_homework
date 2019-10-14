@@ -22,14 +22,8 @@ class LinearLayer(Layer):
         """
         # 3.1) TODO do the linear layer
         # (n x d) (d x c) = (n x c)
-        if (False):
-            print("Input/Output size = ", self.weight.data.shape)
-            print("Data size =", np.shape(data))
 
-        # Save this for backward
-        self.input = data
-        # self.bias.zero_grad()
-        # self.weight.zero_grad()
+        self.input = data # Save this for backward
         return np.matmul(data, self.weight.data)+self.bias.data
 
     def backward(self, previous_partial_gradient: np.ndarray) -> np.ndarray:
@@ -43,13 +37,6 @@ class LinearLayer(Layer):
         # dW = (d x c)
         # dB = (1 x c)
         # dX = (n x d)
-        if (False):
-            print("Linear Layer")
-            print("Prev grad = ", previous_partial_gradient.shape)
-            print("Weight = ", self.weight.data.shape)
-            print("B = ", self.bias.data.shape)
-            print("Data = ", self.input.shape)
-            print("\n")
 
         # Need to save gradient for dw and db
         self.bias.grad=np.sum(previous_partial_gradient, axis=0)

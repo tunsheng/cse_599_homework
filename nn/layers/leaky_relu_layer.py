@@ -14,33 +14,46 @@ class LeakyReLULayer(Layer):
 
     def forward(self, data):
         # 5.2) TODO
-        # Store gradient f'(in) shape =  (n x d)
-        self.data = data
-        #Return f(in) shape = (n x d)
-        return self.relu(data)
+        self.data = data # Store for gradient
+        output = self.relu(data)
+        # output = self.forward_numba(data, self.slope) # Numba version
+        return output
 
 
     def backward(self, previous_partial_gradient):
         # 5.2) TODO
-        # (n x c) x  (c x d) = (n x d)
-        #  dy     dy          df(x)
-        # ---- = --------- X ---------
-        #  dx     df(x)       dx
-
         grad = np.ones_like(self.data)
         grad[self.data<0]=self.slope
         grad[self.data==0]=-0.5
-        return previous_partial_gradient*grad
+        output=previous_partial_gradient*grad
+        # output=self.backward_numba(self.data, self.slope, previous_partial_gradient) # Numba
+        return output
 
-    # @staticmethod
-    # @njit(parallel=True, cache=True)
-    # def backward_numba(data, grad, rows, cols, middle):
-    #     output=np.zeros([rows*cols])
-    #     data = data.flatten()
-    #     grad = grad.flatten()
-    #     for i in prange(rows):
-    #         for k in range(middle):
-    #             for j in range(cols):
-    #                 output[i*cols+j]+=data[i*middle+k]*grad[k*cols+j]
-    #     output = output.reshape([rows,cols])
-    #     return output
+    @staticmethod
+    @njit(parallel=True, cache=True)
+    def forward_numba(data, slope):
+        shape = data.shape
+        output = np.copy(data)
+        output = output.flatten()
+        for i in prange(len(output)):
+            if (output[i]<0):
+                output[i] *= slope
+        output = output.reshape(shape)
+        # output = output.reshape(data.shape)
+        return output
+
+    @staticmethod
+    @njit(parallel=True, cache=True)
+    def backward_numba(data, slope, grad):
+        shape = data.shape
+        output = np.copy(grad)
+        data = data.flatten()
+        output = output.flatten()
+        for i in prange(len(output)):
+            if (data[i]<0):
+                output[i]*=slope
+            elif (data[i]==0):
+                output[i]=-0.5
+        output = output.reshape(shape)
+        data = data.reshape(shape)
+        return output
