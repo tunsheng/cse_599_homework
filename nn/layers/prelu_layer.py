@@ -17,6 +17,9 @@ class PReLULayer(Layer):
         # No need to modify
         pass
 
+    def selfstr(self):
+        return str(self.slope.data)
+
     def forward(self, data):
         # 5.2) TODO
 
@@ -33,11 +36,11 @@ class PReLULayer(Layer):
         data = self.flatten_outer_dims(data) # Flattern outer dims
         flatten_shape = data.shape
         output = np.copy(data)
-
+        temp = np.copy(data)
+        # output = self.forward_numba_full(temp, self.slope_full)
         # Go over each channel
-        # for i in range(flatten_shape[1]):
-        #     output[:,i] = self.forward_numba(data[:,i], self.slope_full[i])
-        output = self.forward_numba_full(data, self.slope_full)
+        for i in range(flatten_shape[1]):
+            output[:,i] = self.forward_numba(temp[:,i], self.slope_full[i])
         # Postprocessing: Deflate data and move axis back to orignal location
         output = self.deflat_dims(output, moveaxis_shape)
         data = self.deflat_dims(data, moveaxis_shape)
@@ -56,13 +59,13 @@ class PReLULayer(Layer):
         previous_partial_gradient = self.flatten_outer_dims(previous_partial_gradient)
         flatten_shape = self.data.shape
         output = np.zeros(flatten_shape)
+        temp = np.copy(previous_partial_gradient)
 
-        output = self.backward_numba_full(self.data, self.slope_full,
-                                        previous_partial_gradient)
+        # output = self.backward_numba_full(self.data, self.slope_full, temp)
         # Go over each channel
-        # for i in range(flatten_shape[1]):
-            # output[:,i] = self.backward_numba(self.data[:,i], self.slope_full[i],
-            #                                     previous_partial_gradient[:,i])
+        for i in range(flatten_shape[1]):
+            output[:,i] = self.backward_numba(self.data[:,i], self.slope_full[i],
+                                                temp[:,i])
             # slope_grad[i] = np.sum((self.data[:,i] < 0)*self.data[:,i])
         df_dalpha = np.zeros(flatten_shape)
         df_dalpha[self.data < 0] = self.data[self.data < 0]
@@ -71,7 +74,7 @@ class PReLULayer(Layer):
         slope_grad = np.sum(dL_dalpha, axis=-1)
 
         if len(self.slope.data) == 1:
-            self.slope.grad[0] = np.sum(slope_grad)
+            self.slope.grad[0] = np.mean(slope_grad)
         else:
             for i in range(flatten_shape[1]):
                 self.slope.grad[i] = slope_grad[i]
@@ -89,7 +92,7 @@ class PReLULayer(Layer):
     @njit(parallel=True, cache=True)
     def forward_numba(data, slope):
         shape = data.shape
-        output = np.copy(data)
+        output = data
         output = output.flatten()
         data = data.flatten()
         for i in prange(len(output)):
@@ -100,10 +103,10 @@ class PReLULayer(Layer):
         return output
 
     @staticmethod
-    @njit(parallel=False, cache=True)
+    @njit(parallel=True, cache=True)
     def backward_numba(data, slope, grad):
         shape = data.shape
-        output = np.copy(grad)
+        output = grad
         data = data.flatten()
         output = output.flatten()
         for i in prange(len(output)):
@@ -115,27 +118,27 @@ class PReLULayer(Layer):
         data = data.reshape(shape)
         return output
 
-    @staticmethod
-    @njit(parallel=False, cache=False)
-    def forward_numba_full(data, slope):
-        output = np.copy(data)
-        for i in range(data.shape[1]):
-            for j in prange(data.shape[0]):
-                if (output[i,j] < 0):
-                    output[i,j] *= slope[i]
-        return output
-
-    @staticmethod
-    @njit(parallel=False, cache=False)
-    def backward_numba_full(data, slope, grad):
-        output = np.copy(grad)
-        for i in range(data.shape[1]):
-            for j in prange(data.shape[0]):
-                if (data[i,j] < 0):
-                    output[i,j] *= slope[i]
-                elif (data[i,j] == 0):
-                    output[i,j] += -0.5
-        return output
+    # @staticmethod
+    # @njit(parallel=True, cache=True)
+    # def forward_numba_full(data, slope):
+    #     output = data
+    #     for i in range(data.shape[1]):
+    #         for j in prange(data.shape[0]):
+    #             if (output[i,j] < 0):
+    #                 output[i,j] *= slope[i]
+    #     return output
+    #
+    # @staticmethod
+    # @njit(parallel=True, cache=True)
+    # def backward_numba_full(data, slope, grad):
+    #     output = grad
+    #     for i in range(data.shape[1]):
+    #         for j in prange(data.shape[0]):
+    #             if (data[i,j] < 0):
+    #                 output[i,j] *= slope[i]
+    #             elif (data[i,j] == 0):
+    #                 output[i,j] += -0.5
+    #     return output
 
     def flatten_outer_dims(self, tensor):
         return tensor.reshape(-1, tensor.shape[-1])
