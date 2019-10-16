@@ -14,12 +14,14 @@ from nn.optimizers import SGDOptimizer, MomentumSGDOptimizer
 
 class MNISTNetwork(Network):
     def __init__(self):
+        self.a1 = layers.PReLULayer((1,1), 0.001)
+        self.a2 = layers.PReLULayer((1,1), 0.001)
         self.network = layers.SequentialLayer(
             [
                 layers.LinearLayer(28 * 28, 1000),
-                self.ReLULayer(),
+                self.a1,
                 layers.LinearLayer(1000, 100),
-                self.ReLULayer(),
+                self.a2,
                 layers.LinearLayer(100, 10),
             ]
         )
@@ -31,6 +33,9 @@ class MNISTNetwork(Network):
 
     def loss(self, predictions, labels):
         return self.loss_layer(predictions, labels)
+
+    def printAlpha(self):
+        return self.a1.selfstr() + " " + self.a2.selfstr()
 
 def train(train_data, train_labels, test_data, test_labels, optimizer_type="sgd"):
     network = MNISTNetwork()
@@ -73,6 +78,7 @@ def train(train_data, train_labels, test_data, test_labels, optimizer_type="sgd"
         loss = network.loss(output, test_labels)
         print("epoch", (epoch + 1), "accuracy %.3f" % accuracy, "loss %.3f" % loss)
         print("-" * 50)
+        print("Print ", network.printAlpha())
     print("done")
 
 
@@ -90,4 +96,4 @@ if __name__ == "__main__":
     test_data = test_data.reshape(-1, 28 ** 2)
     test_labels = test_dataset["labels"]
 
-    train(train_data, train_labels, test_data, test_labels, "sgd")
+    train(train_data, train_labels, test_data, test_labels, "momentum")

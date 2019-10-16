@@ -38,7 +38,7 @@ class ReLUNumbaLayer(Layer):
             if (output[i]<0):
                 output[i]=0
         output = output.reshape(shape)
-        output = output.reshape(data.shape)
+        # output = output.reshape(data.shape)
         return output
 
     def forward(self, data):

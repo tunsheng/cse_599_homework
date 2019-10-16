@@ -89,7 +89,7 @@ class PReLULayer(Layer):
         return output
 
     @staticmethod
-    # @njit(parallel=False, cache=False)
+    @njit(parallel=False, cache=False)
     def forward_numba(data, slope):
         shape = data.shape
         output = data
@@ -103,7 +103,7 @@ class PReLULayer(Layer):
         return output
 
     @staticmethod
-    # @njit(parallel=False, cache=False)
+    @njit(parallel=False, cache=False)
     def backward_numba(data, slope, grad):
         shape = data.shape
         output = grad
