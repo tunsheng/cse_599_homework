@@ -89,13 +89,13 @@ class PReLULayer(Layer):
         return output
 
     @staticmethod
-    @njit(parallel=True, cache=True)
+    # @njit(parallel=False, cache=False)
     def forward_numba(data, slope):
         shape = data.shape
         output = data
         output = output.flatten()
         data = data.flatten()
-        for i in prange(len(output)):
+        for i in range(len(output)):
             if (output[i] < 0):
                 output[i] = data[i] * slope
         output = output.reshape(shape)
@@ -103,13 +103,13 @@ class PReLULayer(Layer):
         return output
 
     @staticmethod
-    @njit(parallel=True, cache=True)
+    # @njit(parallel=False, cache=False)
     def backward_numba(data, slope, grad):
         shape = data.shape
         output = grad
         data = data.flatten()
         output = output.flatten()
-        for i in prange(len(output)):
+        for i in range(len(output)):
             if (data[i] < 0):
                 output[i] *= slope
             elif (data[i] == 0):

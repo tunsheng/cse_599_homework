@@ -17,9 +17,9 @@ class MNISTNetwork(Network):
         self.network = layers.SequentialLayer(
             [
                 layers.LinearLayer(28 * 28, 1000),
-                layers.ReLULayer(),
+                self.ReLULayer(),
                 layers.LinearLayer(1000, 100),
-                layers.ReLULayer(),
+                self.ReLULayer(),
                 layers.LinearLayer(100, 10),
             ]
         )
@@ -31,7 +31,6 @@ class MNISTNetwork(Network):
 
     def loss(self, predictions, labels):
         return self.loss_layer(predictions, labels)
-
 
 def train(train_data, train_labels, test_data, test_labels, optimizer_type="sgd"):
     network = MNISTNetwork()
@@ -91,4 +90,4 @@ if __name__ == "__main__":
     test_data = test_data.reshape(-1, 28 ** 2)
     test_labels = test_dataset["labels"]
 
-    train(train_data, train_labels, test_data, test_labels, "momentum")
+    train(train_data, train_labels, test_data, test_labels, "sgd")

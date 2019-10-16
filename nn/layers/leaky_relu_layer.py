@@ -39,7 +39,6 @@ class LeakyReLULayer(Layer):
             if (output[i]<0):
                 output[i] *= slope
         output = output.reshape(shape)
-        # output = output.reshape(data.shape)
         return output
 
     @staticmethod

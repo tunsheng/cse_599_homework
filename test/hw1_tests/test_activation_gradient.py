@@ -20,9 +20,9 @@ def _test_backward_approx(layer, data_shape):
 
 def test_layers():
     layers = [
-        # (ReLULayer(), (10, 20, 30)),
-        # (LeakyReLULayer(0.001), (10, 20, 30)),
-        # (PReLULayer(8, 0.001), (10, 8, 100)),
+        (ReLULayer(), (10, 20, 30)),
+        (LeakyReLULayer(0.001), (10, 20, 30)),
+        (PReLULayer(8, 0.001), (10, 8, 100)),
         (PReLULayer((1,1), 0.001), (10, 8, 100)),
     ]
 
