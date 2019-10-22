@@ -54,7 +54,7 @@ Note that calling `param.grad = ...` actually does the `+=` operation in order t
 ### 3.1 Linear Layer ###
 
 Open [nn/layers/linear_layer.py](nn/layers/linear_layer.py). Implementing the linear layer should be pretty straightforward. 
-Implement both the forward and backward function. You should not include a nonlinearity here (that will be somewhere else). 
+Implement both the `forward` and `backward` function. You should not include a nonlinearity here (that will be somewhere else). 
 Also take a look at `selfstr`. This includes some extra information that will print when you call `print` on the layer or the network. 
 You don't need to change that, but you might want to do similar things in other layers.
 
@@ -64,7 +64,7 @@ You can expect the `LinearLayer` to take as input a 2D array of `(batch X featur
 
 ### 3.2 ReLU Layer ###
 
-ReLU is a pretty simple operation, but we will implement it in two different ways. DO NOT implement ReLU in place. 
+ReLU is a pretty simple operation, but we will implement it in two different ways. DO NOT implement ReLU in place (you can use in-place operations, but you should not in-place modify the input data itself). 
 Since the gradient is undefined at 0 but is 0 for values less than 0, we will define the gradient at 0 to be 0 for simplicity.
 
 ReLU Layers (and all the non-linearities you implement) should accept arrays of arbitrary shape.
@@ -184,6 +184,7 @@ Implement the PReLU function where the leaky slope is a learned parameter. Again
 
 
 For more information, see https://arxiv.org/pdf/1502.01852.pdf
+Note: The paper also lists a momentum rule which is different from the one we expect you to implement. You should ignore the one in the paper, but also Momentum computations will be taken care of in the optimizer, not in the PReLU layer itself.
 
 PReLU can be either one value per channel (which we will assume is dimension 1 of the input) or one slope for the entire layer.
 Thus, the `size` input will be an integer >= 1. 

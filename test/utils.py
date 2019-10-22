@@ -3,6 +3,8 @@ from collections import defaultdict
 import numpy as np
 import torch
 
+TOLERANCE = 1e-4
+
 
 def to_numpy(array):
     if isinstance(array, torch.Tensor):
@@ -57,3 +59,41 @@ def from_numpy(np_array):
             from_numpy_warn[np.str_] = True
         return np_array
     return torch.from_numpy(np_array)
+
+
+def assign_linear_layer_weights(layer, torch_layer):
+    with torch.no_grad():
+        torch_layer.weight[:] = torch.from_numpy(layer.weight.data).transpose(0, 1)
+        torch_layer.bias[:] = torch.from_numpy(layer.bias.data)
+
+
+def assign_conv_layer_weights(layer, torch_layer):
+    with torch.no_grad():
+        torch_layer.weight[:] = torch.from_numpy(layer.weight.data).transpose(0, 1)
+        torch_layer.bias[:] = torch.from_numpy(layer.bias.data)
+
+
+def allclose(val1, val2, atol=TOLERANCE):
+    val1 = to_numpy(val1)
+    val2 = to_numpy(val2)
+    val1[np.abs(val1) < 1e-4] = 0
+    val2[np.abs(val2) < 1e-4] = 0
+    return np.allclose(val1, val2, atol=atol)
+
+
+def check_linear_grad_match(layer, torch_layer, tolerance=TOLERANCE):
+    w_grad = layer.weight.grad
+    torch_w_grad = to_numpy(torch_layer.weight.grad.transpose(0, 1))
+    assert allclose(w_grad, torch_w_grad, tolerance)
+    b_grad = layer.bias.grad
+    torch_b_grad = to_numpy(torch_layer.bias.grad)
+    assert allclose(b_grad, torch_b_grad, tolerance)
+
+
+def check_conv_grad_match(layer, torch_layer, tolerance=TOLERANCE):
+    w_grad = layer.weight.grad
+    torch_w_grad = to_numpy(torch_layer.weight.grad.transpose(0, 1))
+    assert allclose(w_grad, torch_w_grad, tolerance)
+    b_grad = layer.bias.grad
+    torch_b_grad = to_numpy(torch_layer.bias.grad)
+    assert allclose(b_grad, torch_b_grad, tolerance)
