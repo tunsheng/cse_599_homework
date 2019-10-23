@@ -15,7 +15,7 @@ class ConvLayer(Layer):
         self.kernel_size = kernel_size
         self.padding = (kernel_size - 1) // 2
         self.stride = stride
-        self.input = None
+        self.input_pad = None
         self.initialize()
 
     """
@@ -37,91 +37,107 @@ class ConvLayer(Layer):
     or larger than the stride.
     """
 
-    def im2col(self, matrix, kernel_size, stride, padding):
-        # Input: sptial block of image
-        # Output: columns of matrix
-        # Assuming filter is a square
-        #  In (batch, input_channels, height, width)
-        #  Out (input_channels*kernel*kernel, output_height*output_width*batch)
-        p=padding
-        original_shape = matrix.shape
-        paddedMatrix = np.pad(matrix, ((0,0),(0,0),(p,p),(p,p)), mode='constant')
-        nbatch, nchannels, height, width = np.shape(paddedMatrix)
-        outputHeight = int((height-kernel_size)/stride+1)
-        outputWidth = int((width-kernel_size)/stride+1)
-        output = np.zeros([ nchannels*(kernel_size**2), nbatch*outputWidth*outputHeight ])
-
-        # Different center for different kernel size
-        if (kernel_size%2==0):
-            offsetLower = 0
-            offsetUpper = kernel_size
-        else:
-            offsetLower = kernel_size//2
-            offsetUpper = kernel_size//2 +1
-
-        for k in range(nbatch):
-            counter = 0
-            batch = k*outputWidth*outputHeight
-            for i in range(0, height, stride):
-                for j in range(0, width, stride):
-                    V = np.pad(np.ones([original_shape[2], original_shape[3]]), ((p,p),(p,p)), mode='constant')
-                    if ((p-1)<j) and (j<(width-p)) and ((p-1)<i) and (i<(height-p)):
-                        if ((j+offsetUpper) <= width) and ((i+offsetUpper) <= height):
-                            patch = paddedMatrix[batch, 0, i-offsetLower:i+offsetUpper, j-offsetLower:j+offsetUpper].reshape(-1,1)
-                            for c in range(1, nchannels):
-                                patch = np.vstack((patch, paddedMatrix[batch, c, i-offsetLower:i+offsetUpper, j-offsetLower:j+offsetUpper].reshape(-1,1)))
-                            output[:, batch+counter] = patch.flatten()
-                            counter+= 1
-                            # For visualization (debug)
-                            if (False):
-                                V[ i-offsetLower:i+offsetUpper, j-offsetLower:j+offsetUpper]=2
-                                V[i,j]=3
-                                plt.axhline(i)
-                                plt.axvline(j)
-                                plt.imshow(V)
-                                plt.pause(0.1)
-        return output
-
-    def col2im(self, matrix, original_shape, kernel_size, stride, padding):
-        nbatch, nchannels, height, width = original_shape
-        paddedHeight = height+2*padding
-        paddedWidth = width+2*padding
-        paddedMatrix = np.zeros([nbatch*nchannels*paddedHeight*paddedWidth])
-        indices = np.array([ i for i in range(np.cumprod(original_shape)[-1])]).reshape(original_shape)
-        col_indices = im2col(indices, kernel_size, stride, padding).flatten()
-        matrix=matrix.flatten()
-        for i in range(len(col_indices)):
-            paddedMatrix[int(col_indices[i])] = matrix[i]
-        paddedMatrix = paddedMatrix.reshape([nbatch, nchannels, paddedHeight, paddedWidth])
-        if padding == 0:
-            return paddedMatrix
-        return paddedMatrix[:, :, padding:-padding, padding:-padding]
-
     @staticmethod
     @njit(parallel=True, cache=True)
-    def forward_numba(data, weights, bias):
+    def forward_numba(data_pad, prev_shape, weights, bias, kernel_size, stride, padding):
         # TODO
         # data is N x C x H x W
         # kernel is COld x CNew x K x K
+        """
+        Input:
+            data   - column transformed images (Cold x K x K) x (HNew x WNew x N)
+            weight - Cold x CNew x K x K
+        Transformed
+            weight - (Cold x K x K) x CNew
+        Output:
+            output - column transfromed images CNew x (HNew x WNew x N)
+        """
+        m, n_C_prev, n_H_prev, n_W_prev = prev_shape
+        m, n_Cprev, pad_H, pad_W = data_pad.shape
+        n_Cprev, n_C, kernel_size, kernel_size = weights.shape
+        n_H = int((n_H_prev-kernel_size+2*padding)/stride)+1
+        n_W = int((n_W_prev-kernel_size+2*padding)/stride)+1
 
-        weights = np.moveaxis(weights, 1, -1)
-        weights_shape_moveaxis = weights.shape
-        weights = weights.reshape(-1, weights.shape[-1]) # (K K  COld) x CNew
+        output = np.zeros((m, n_C, n_H, n_W))
+        b = np.zeros((n_C, n_H, n_W)).flatten()
+        for i in prange(n_C):
+            for j in prange(len(b)):
+                b[j] = bias[i]
+        b = b.reshape(n_C, n_H, n_W)
 
-        colim = self.im2col()
-        output = np.matmul(weights.T, colim)+ bias # CNew x ( N x H x W)
-        output = self.col2im()
+        for i in prange(m):
+            batch_pad = data_pad[i]
+            for c in prange(n_C):
+                for h in prange(n_H):
+                    for w in prange(n_W):
+                        vert_start = h*stride
+                        vert_end = vert_start+kernel_size
+                        horiz_start = w*stride
+                        horiz_end = horiz_start+kernel_size
+                        patch = batch_pad[:,vert_start:vert_end,horiz_start:horiz_end]
+                        xw = np.multiply(patch, weights[:,c,:,:])
+                        output[i, c, h, w] = np.sum(xw) + np.sum(b[c,:,:])
 
-        # Return to original shape
-        weights = weights.reshape(logits_shape_moveaxis)
-        weights = np.moveaxis(weights, -1, 1)
         return output
 
     def forward(self, data):
-        # TODO
-        self.input = data
-        output = forward_numba(self.input, self.weights.data, self.bias.data)
-        return None
+        # Declare variables
+        padding, p = self.padding, self.padding
+        stride = self.stride
+        kernel_size = self.kernel_size
+        weights = self.weight.data
+        bias = self.bias.data
+
+        data_pad = np.pad(data, ((0,0),(0,0),(p,p),(p,p)),
+                        'constant',constant_values=(0))
+        output = self.forward_numba(data_pad, data.shape, weights, bias,
+                                    kernel_size, stride, padding)
+
+        # Save paaded data
+        self.input_pad = data_pad
+        return output
+
+    # def forward(self, data):
+    #     # TODO
+    #     self.input = data
+    #
+    #     # Declare variables
+    #     padding, p = self.padding, self.padding
+    #     stride = self.stride
+    #     kernel_size = self.kernel_size
+    #     weights = self.weight.data
+    #     # original_shape = data.shape
+    #     # nbatch, nchannels, height, width = original_shape
+    #     # nbatch, nchannels, padded_height, padded_width = padded_matrix.shape
+    #     # output_height = int((height-kernel_size)/stride+1)
+    #     # output_width = int((width-kernel_size)/stride+1)
+    #
+    #     # Create padded matrix
+    #     padded_matrix = np.pad(data, ((0,0),(0,0),(p,p),(p,p)), mode='constant')
+    #     column_data = self.im2col(padded_matrix, kernel_size, stride, padding)
+    #
+    #     ## Matrix multiplication
+    #     weights = np.moveaxis(weights, 1, -1)
+    #     weights_shape_moveaxis = weights.shape
+    #     weights = weights.reshape(-1, weights.shape[-1])
+    #     output = np.matmul(weights.T, column_data)+ self.bias.data
+    #     weights = weights.reshape(weights_shape_moveaxis)
+    #     weights = np.moveaxis(weights, -1, 1)
+    #
+    #     # Auxiliary array since numba cant create array Zzz
+    #     empty_matrix = np.zeros([ nbatch*nchannels*padded_height*padded_width ])
+    #
+    #     # Convert back to images
+    #     indices = self.create_index(data)
+    #     indices = np.pad(indices, ((0,0),(0,0),(p,p),(p,p)), mode='constant', constant_values=-1)
+    #     col_indices = self.im2col(indices, self.kernel_size, self.stride, self.padding).flatten()
+    #
+    #     output = self.col2im(output, empty_matrix, col_indices, data.shape, self.kernel_size, self.stride, self.padding)
+    #     output = output.reshape([nbatch, nchannels, padded_height, padded_width])
+    #
+    #     if padding == 0:
+    #         return output
+    #     return output[:, :, padding:-padding, padding:-padding]
 
     @staticmethod
     @njit(cache=True, parallel=True)
@@ -132,7 +148,11 @@ class ConvLayer(Layer):
         return None
 
     def backward(self, previous_partial_gradient):
+        print("Shape = ", previous_partial_gradient.shape)
         # TODO
+        # Previous_partial_gradient has the shape of N x CNew x HNew x WNew
+
+        
         return None
 
     def selfstr(self):
