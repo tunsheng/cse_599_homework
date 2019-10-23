@@ -26,7 +26,7 @@ def _test_max_pool_forward(input_shape, kernel_size, stride):
 
     assert np.all(input == original_input)
     assert output.shape == torch_out.shape
-    assert np.allclose(output, torch_out, atol=TOLERANCE)
+    utils.assert_close(output, torch_out, atol=TOLERANCE)
 
 
 def test_max_pool_forward_batch_input_output():
@@ -70,7 +70,7 @@ def _test_max_pool_backward(input_shape, kernel_size, stride):
     torch_out_grad = utils.to_numpy(torch_input.grad)
     out_grad[np.abs(out_grad) < 1e-4] = 0
     torch_out_grad[np.abs(torch_out_grad) < 1e-4] = 0
-    assert np.allclose(out_grad, torch_out_grad, atol=TOLERANCE)
+    utils.assert_close(out_grad, torch_out_grad, atol=TOLERANCE)
 
 
 def test_max_pool_backward_batch_input_output():

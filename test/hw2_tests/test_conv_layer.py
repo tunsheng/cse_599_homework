@@ -28,7 +28,7 @@ def _test_conv_forward(input_shape, out_channels, kernel_size, stride):
 
     assert np.all(input == original_input)
     assert output.shape == torch_out.shape
-    assert utils.allclose(output, torch_out, atol=TOLERANCE)
+    utils.assert_close(output, torch_out, atol=TOLERANCE)
 
 
 def test_conv_forward_batch_input_output():
@@ -73,7 +73,7 @@ def _test_conv_backward(input_shape, out_channels, kernel_size, stride):
     torch_out = torch_layer(torch_input)
     torch_out.sum().backward()
 
-    assert utils.allclose(out_grad, torch_input.grad, atol=TOLERANCE)
+    utils.assert_close(out_grad, torch_input.grad, atol=TOLERANCE)
     utils.check_conv_grad_match(layer, torch_layer)
 
 

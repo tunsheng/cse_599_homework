@@ -2,7 +2,6 @@ import numpy as np
 import torch.nn.functional as F
 
 from nn.layers.losses import SoftmaxCrossEntropyLossLayer
-
 from test import utils
 
 
@@ -20,7 +19,8 @@ def _test_forward(input_shape, reduction, axis):
             utils.from_numpy(data.swapaxes(1, axis)), utils.from_numpy(labels), reduction=reduction
         )
     pytorch_loss = utils.to_numpy(pytorch_loss)
-    assert np.allclose(loss, pytorch_loss, atol=0.001)
+
+    utils.assert_close(loss, pytorch_loss, atol=0.001)
 
 
 def test_forward_easy():
@@ -44,7 +44,7 @@ def _test_forward_overflow(input_shape, reduction, axis):
         )
     pytorch_loss = utils.to_numpy(pytorch_loss)
 
-    assert np.allclose(loss, pytorch_loss, atol=0.001)
+    utils.assert_close(loss, pytorch_loss, atol=0.001)
 
 
 def test_forward_overflow():
@@ -78,14 +78,14 @@ def _test_backward(input_shape, reduction, axis):
     else:
         pytorch_loss.backward()
 
-    assert np.allclose(loss, utils.to_numpy(pytorch_loss))
+    utils.assert_close(loss, utils.to_numpy(pytorch_loss))
 
     grad = layer.backward()
     torch_grad = utils.to_numpy(torch_input.grad)
     if axis != 1:
         torch_grad = np.moveaxis(torch_grad, 1, axis)
 
-    assert np.allclose(grad, torch_grad, atol=0.001)
+    utils.assert_close(grad, torch_grad, atol=0.001)
 
 
 def test_backward_easy():
