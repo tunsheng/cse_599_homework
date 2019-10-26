@@ -22,12 +22,11 @@ class ConvLayer(Layer):
 
     @staticmethod
     @njit(parallel=True, cache=True)
-    def forward_numba(padded_data, weight, bias, unpadded_shape, padding, stride):
-        nimages, input_channels, height, width = unpadded_shape
+    def forward_numba(padded_data, weight, bias, stride):
         nimages, input_channels, padded_height, padded_width = padded_data.shape
         input_channels, output_channels, filter_height, filter_width = weight.shape
-        output_height = int((height-filter_height+2*padding) // stride) + 1
-        output_width = int((width-filter_width+2*padding) // stride) + 1
+        output_height = int((padded_height-filter_height) // stride) + 1
+        output_width = int((padded_width-filter_width) // stride) + 1
 
         output = np.zeros((nimages, output_channels, output_height, output_width))
         colmat_transposed = np.zeros((nimages, input_channels*filter_height*filter_width, output_height*output_width))
@@ -49,15 +48,15 @@ class ConvLayer(Layer):
 
     def forward(self, data):
         # Declare variables
-        padding, p = self.padding, self.padding
+        p = self.padding
         stride = self.stride
         kernel_size = self.kernel_size
         weight = self.weight.data
         bias = self.bias.data
-        data_pad = np.pad(data, ((0,0),(0,0),(p,p),(p,p)),
+        padded_data = np.pad(data, ((0,0),(0,0),(p,p),(p,p)),
                         'constant',constant_values=(0))
-        output, self.colmat_transposed = self.forward_numba(data_pad, weight, bias,
-                                    data.shape,  padding, stride)
+        output, self.colmat_transposed = self.forward_numba(padded_data,
+                                            weight, bias, stride)
         self.input_shape = data.shape
         return output
 
@@ -111,7 +110,7 @@ class ConvLayer(Layer):
         self.weight.grad = dkernel
         self.bias.grad = db
 
-        if (p>0):
+        if (padding>0):
             return dinput[:,:,p:-p,p:-p]
         else:
             return dinput
