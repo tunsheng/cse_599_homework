@@ -20,7 +20,7 @@ class ReLULayer(Layer):
     def backward(self, previous_partial_gradient):
         # TODO
         # new_grad = dy/df(in) * df(in)/d(in)
-        return previous_partial_gradient*(self.input >=0)
+        return previous_partial_gradient*(self.input > 0)
 
 class ReLUNumbaLayer(Layer):
     def __init__(self, parent=None):
@@ -56,7 +56,7 @@ class ReLUNumbaLayer(Layer):
         data = data.flatten()
         output = output.flatten()
         for i in prange(len(output)):
-            if (data[i]<0):
+            if (data[i] <= 0):
                 output[i]=0
         output = output.reshape(shape)
         data = data.reshape(shape)

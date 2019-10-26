@@ -23,10 +23,9 @@ class LeakyReLULayer(Layer):
     def backward(self, previous_partial_gradient):
         # 5.2) TODO
         grad = np.ones_like(self.data)
-        grad[self.data<0]=self.slope
-        grad[self.data==0]=-0.5
+        grad[self.data < 0]=self.slope
+        grad[self.data==0] = 0
         output=previous_partial_gradient*grad
-        # output=self.backward_numba(self.data, self.slope, previous_partial_gradient) # Numba
         return output
 
     @staticmethod
@@ -51,8 +50,6 @@ class LeakyReLULayer(Layer):
         for i in prange(len(output)):
             if (data[i]<0):
                 output[i]*=slope
-            elif (data[i]==0):
-                output[i]=-0.5
         output = output.reshape(shape)
         data = data.reshape(shape)
         return output
