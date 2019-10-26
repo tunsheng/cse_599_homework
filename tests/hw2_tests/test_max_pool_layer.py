@@ -3,7 +3,7 @@ import torch
 from torch import nn
 
 from nn.layers.max_pool_layer import MaxPoolLayer
-from test import utils
+from tests import utils
 
 TOLERANCE = 1e-4
 
@@ -61,15 +61,13 @@ def _test_max_pool_backward(input_shape, kernel_size, stride):
     torch_layer = nn.MaxPool2d(kernel_size, stride, padding)
 
     output = layer.forward(input)
-    out_grad = layer.backward(np.ones_like(output))
+    out_grad = layer.backward(2 * np.ones_like(output) / output.size)
 
     torch_input = utils.from_numpy(input).requires_grad_(True)
     torch_out = torch_layer(torch_input)
-    torch_out.sum().backward()
+    (2 * torch_out.mean()).backward()
 
     torch_out_grad = utils.to_numpy(torch_input.grad)
-    out_grad[np.abs(out_grad) < 1e-4] = 0
-    torch_out_grad[np.abs(torch_out_grad) < 1e-4] = 0
     utils.assert_close(out_grad, torch_out_grad, atol=TOLERANCE)
 
 

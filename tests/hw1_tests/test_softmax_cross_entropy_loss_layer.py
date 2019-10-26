@@ -2,7 +2,7 @@ import numpy as np
 import torch.nn.functional as F
 
 from nn.layers.losses import SoftmaxCrossEntropyLossLayer
-from test import utils
+from tests import utils
 
 
 def _test_forward(input_shape, reduction, axis):

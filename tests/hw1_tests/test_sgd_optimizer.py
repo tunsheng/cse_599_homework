@@ -4,7 +4,7 @@ import torch
 import nn
 import nn.layers
 from nn.optimizers import sgd_optimizer
-from test import utils
+from tests import utils
 
 
 class TorchNet(torch.nn.Module):

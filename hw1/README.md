@@ -12,11 +12,11 @@ It's actually pretty impressive that we can make a neural net that reads handwri
 We have provided some tests for checking your implementation. The tests are intentionally missing some cases, but feel free to write more tests yourself.
 To run the tests from the outermost directory, simply run
 ```bash
-pytest test/hw1_tests
+pytest tests/hw1_tests
 ```
 Or to run them for an individual file (for example test_linear_layer), run
 ```bash
-pytest test/hw1_tests/test_linear_layer.py
+pytest tests/hw1_tests/test_linear_layer.py
 ```
 
 ## Rules ##

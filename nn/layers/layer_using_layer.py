@@ -22,7 +22,7 @@ class LayerUsingLayer(Layer, ABC):
         else:
             self._parent = val
 
-    def backward(self, previous_partial_gradients=None) -> None:
+    def backward(self, previous_partial_gradients=None) -> np.ndarray:
         if previous_partial_gradients is not None:
             gradient = self.final_layer.backward(previous_partial_gradients)
         else:
@@ -63,6 +63,7 @@ class LayerUsingLayer(Layer, ABC):
             output_grad = layer.backward(grad_dict[layer])
             if layer.parents is not None:
                 self._assign_parent_grads(layer, output_grad, grad_dict)
+        return output_grad
 
     @staticmethod
     def _assign_parent_grads(layer, grad, grad_dict):

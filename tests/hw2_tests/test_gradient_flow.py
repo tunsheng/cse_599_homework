@@ -8,7 +8,7 @@ from nn import Network
 from nn import layers
 from nn.layers import losses
 from nn.layers.block_layers import ResNetBlock
-from test import utils
+from tests import utils
 
 
 class MNISTResNetwork(Network):

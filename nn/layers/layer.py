@@ -126,21 +126,20 @@ class Layer(object):
 
     def _total_str(self, depth=0) -> List[str]:
         from nn.layers.dummy_layer import DummyLayer
-
         total_str_arr = []
         for obj, val in self.vars():
             if isinstance(val, Layer):
                 if isinstance(val, DummyLayer):
                     total_str_arr.extend(val._total_str(depth))
                 else:
-                    total_str_arr.append(("(" + obj + "): " + val.name + val.selfstr(), depth))
+                    total_str_arr.append(("(" + obj + "): " + val.name + ": " + val.selfstr(), depth))
                     # total_str_arr.append((val.selfstr(), depth + 1))
                     total_str_arr.extend(val._total_str(depth + 1))
         return total_str_arr
 
     def __str__(self):
         total_str_arr = list()
-        total_str_arr.append((self.name + self.selfstr(), 0))
+        total_str_arr.append((self.name + ": " + self.selfstr(), 0))
         # total_str_arr.append((self.selfstr(), 1))
         total_str_arr.extend(self._total_str(1))
         filtered_strs = []

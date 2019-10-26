@@ -3,7 +3,7 @@ import torch
 from torch import nn
 
 from nn.layers.linear_layer import LinearLayer
-from test import utils
+from tests import utils
 
 TOLERANCE = 1e-4
 

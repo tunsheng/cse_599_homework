@@ -1,7 +1,7 @@
 import numpy as np
 
 from nn.layers import *
-from test import utils
+from tests import utils
 
 
 def _test_backward_approx(layer, data_shape):

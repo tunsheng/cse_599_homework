@@ -10,6 +10,7 @@ from .max_pool_layer import MaxPoolLayer
 from .prelu_layer import PReLULayer
 from .relu_layer import ReLULayer, ReLUNumbaLayer
 from .sequential_layer import SequentialLayer
+from .torch_conv_layer import TorchConvLayer
 
 __all__ = [
     "Layer",
@@ -25,4 +26,5 @@ __all__ = [
     "ReLULayer",
     "ReLUNumbaLayer",
     "SequentialLayer",
+    "TorchConvLayer",
 ]

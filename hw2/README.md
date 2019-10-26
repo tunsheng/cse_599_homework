@@ -10,11 +10,11 @@ We're also going to work on CIFAR, and even ImageNet, more challenging datasets 
 We have provided some tests for checking your implementation. Feel free to write more. But the tests for Conv and MaxPool should be sufficient for those layers.
 To run the tests from the outermost directory, simply run
 ```bash
-pytest test/hw2_tests
+pytest tests/hw2_tests
 ```
 Or to run them for an individual file (for example test_conv_layer), run
 ```bash
-pytest test/hw2_tests/test_conv_layer.py
+pytest tests/hw2_tests/test_conv_layer.py
 ```
 
 ## Rules ##
