@@ -20,24 +20,6 @@ class ConvLayer(Layer):
         self.colmat_transposed = None
         self.initialize()
 
-    # @staticmethod
-    # @njit(parallel=True, cache=True)
-    # def im2col(data, filter_height, filter_width, stride):
-    #     # Single image im2col
-    #     input_channels, height, width = data.shape
-    #     new_height = int((height-filter_height) // stride) + 1
-    #     new_width = int((width-filter_width) // stride) + 1
-    #     col = np.zeros((new_height*new_width, input_channels*filter_width*filter_width))
-    #     for i in prange(new_height):
-    #        for j in prange(new_width):
-    #            start_h = i*stride
-    #            end_h = start_h+filter_height
-    #            start_w = j*stride
-    #            end_w = start_w+filter_width
-    #            patch = data[:, start_h:end_h, start_w:end_w]
-    #            col[i*new_width+j, :] = patch.flatten()
-    #     return col
-
     @staticmethod
     @njit(parallel=True, cache=True)
     def forward_numba(padded_data, weight, bias, unpadded_shape, padding, stride):
@@ -74,63 +56,14 @@ class ConvLayer(Layer):
         bias = self.bias.data
         data_pad = np.pad(data, ((0,0),(0,0),(p,p),(p,p)),
                         'constant',constant_values=(0))
-
-        if (False): # Run serial
-            nimages, input_channels, height, width = data.shape
-            input_channels, output_channels, filter_height, filter_width = weight.shape
-            output_height = int((height-kernel_size+2*padding) // stride) + 1
-            output_width = int((width-kernel_size+2*padding) // stride) + 1
-            output = np.zeros((nimages, output_channels, output_height, output_width))
-            self.colmat_transposed = np.zeros((nimages, output_height*output_width, input_channels*filter_width*filter_width))
-
-        else: # Run numbas
-            output, self.colmat_transposed = self.forward_numba(data_pad, weight, bias,
-                                        data.shape,  padding, stride)
+        output, self.colmat_transposed = self.forward_numba(data_pad, weight, bias,
+                                    data.shape,  padding, stride)
         self.input_shape = data.shape
         return output
 
     @staticmethod
     @njit(cache=True, parallel=True)
-    def backward_numba(previous_grad, colmat, original_shape, kernel_shape, kernel_col):
-        nimages, output_channels, output_height, output_width = previous_grad.shape
-        rubbish, input_channels, height, width = original_shape
-        input_channels, output_channels, filter_height, filter_width = kernel_shape
-
-        dkernel = np.zeros((input_channels*filter_height*filter_width, output_channels))
-        dinput = np.zeros((nimages, output_height*output_width, input_channels*filter_height*filter_width))
-        db = np.zeros((output_channels))
-        for n in prange(nimages):
-            for c in prange(output_channels):
-                image_col = colmat[n, :, :]
-                A = previous_grad[n, c, :, :].flatten()
-                db[c] += np.mean(A)
-                for i in prange(input_channels*filter_height*filter_width):
-                    for k in prange(output_height*output_width):
-                        dkernel[i, c] += np.multiply(image_col[i,k], A[k])
-                        dinput[n, k, i] += np.multiply(A[k], kernel_col[i, c])
-        return dinput, dkernel, db
-
-    @staticmethod
-    @njit(cache=True, parallel=True)
-    def col2im_numba(colmat, original_shape, kernel_shape, output_shape, stride):
-        # Col2Im
-        nimages, output_channels, output_height, output_width = output_shape
-        nimages, input_channels, height, width = original_shape
-        input_channels, output_channels, filter_height, filter_width = kernel_shape
-        out = np.zeros((nimages, input_channels, height, width))
-        for n in prange(nimages):
-            for i in prange(output_height):
-               for j in prange(output_width):
-                   start_h = i*stride
-                   end_h = start_h+filter_height
-                   start_w = j*stride
-                   end_w = start_w+filter_width
-                   out[n, :, start_h:end_h, start_w:end_w] = colmat[n, i*output_width+j, :].reshape(input_channels, filter_height, filter_width)
-        return out
-
-    @staticmethod
-    @njit(cache=True, parallel=True)
-    def backward_numba_mixed(previous_grad, colmat_transposed, original_shape, kernel, padding, stride):
+    def backward_numba(previous_grad, colmat_transposed, original_shape, kernel, padding, stride):
         nimages, output_channels, output_height, output_width = previous_grad.shape
         nimages, input_channels, height, width = original_shape
         input_channels, output_channels, filter_height, filter_width = kernel.shape
@@ -168,69 +101,11 @@ class ConvLayer(Layer):
         original_shape = self.input_shape
         kernel_shape = self.weight.data.shape
 
-        if (True): # Backprop
-            if (False):
-                colmat_transposed = self.colmat_transposed
-                nimages, output_channels, output_height, output_width = previous_partial_gradient.shape
-                rubbish, input_channels, height, width = original_shape
-                input_channels, output_channels, filter_height, filter_width = kernel_shape
+        dinput, dkernel, db = self.backward_numba(previous_partial_gradient,
+         self.colmat_transposed, original_shape, self.weight.data, padding, stride)
 
-                dinput = np.zeros((nimages, input_channels, height+2*padding, width+2*padding))
-                dkernel = np.zeros((input_channels*filter_height*filter_width, output_channels))
-                db = np.zeros((output_channels))
-                for n in prange(nimages):
-                    for c in prange(output_channels):
-                        A  = np.dot(colmat_transposed[n, :, :], previous_partial_gradient[n,c,:,:].reshape(-1,1))
-                        dkernel[:, c] += A.flatten()
-                        for i in prange(output_height):
-                           for j in prange(output_width):
-                               start_h = i*stride
-                               end_h = start_h+filter_height
-                               start_w = j*stride
-                               end_w = start_w+filter_width
-                               dinput[n, :, start_h:end_h, start_w:end_w]+=previous_partial_gradient[n,c,i,j]*self.weight.data[:,c,:,:]
-                               db[c] += previous_partial_gradient[n,c,i,j]
-            else: # Run numba
-                dinput, dkernel, db = self.backward_numba_mixed(
-                    previous_partial_gradient, self.colmat_transposed,
-                     original_shape, self.weight.data, padding, stride)
-            dkernel = dkernel.reshape(kernel_shape[0], kernel_shape[2], kernel_shape[3], kernel_shape[1])
-            dkernel = np.moveaxis(dkernel, -1, 1)
-        else: # Untested backprop
-            # Since numba cannot move axis :-(
-            kernel_col = self.weight.data
-            kernel_col = np.moveaxis(kernel_col, 1, -1)
-            kernel_col_moveaxis_shape = kernel_col.shape
-            kernel_col = kernel_col.reshape(-1, kernel_col.shape[-1])
-            colmat = np.moveaxis(self.colmat_transposed, 1, -1)
-            dinput, dkernel, db = self.backward_numba(previous_partial_gradient, colmat,
-             original_shape, kernel_shape, kernel_col)
-
-
-            if (False): # Col2Im
-                if (True): # Run without numb
-                    nimages, input_channels, height, width = self.input_shape
-                    filter_height, filter_width = kernel_size, kernel_size
-                    nimages, output_channels, output_height, output_width = previous_partial_gradient.shape
-                    out = np.zeros((nimages, input_channels, height, width))
-                    out = np.pad(out, ((0,0),(0,0),(p,p),(p,p)),
-                                    'constant',constant_values=(0))
-
-                    for n in range(nimages):
-                        for i in range(output_height):
-                           for j in range(output_width):
-                               start_h = i*stride
-                               end_h = start_h+filter_height
-                               start_w = j*stride
-                               end_w = start_w+filter_width
-                               out[n, :, start_h:end_h, start_w:end_w] = dinput[n, i*output_width+j, :].reshape(input_channels, filter_height, filter_width)
-                else:
-                    output_shape = previous_partial_gradient.shape
-                    nimages, input_channels, height, width = original_shape
-                    padded_original_shape = (nimages, input_channels, height+2*padding, width+2*padding)
-                    out = self.col2im_numba(dinput, padded_original_shape, kernel_shape, output_shape, stride)
-            kernel_col = kernel_col.reshape(kernel_col_moveaxis_shape)
-            kernel_col = np.moveaxis(kernel_col, -1, 1)
+        dkernel = dkernel.reshape(kernel_shape[0], kernel_shape[2], kernel_shape[3], kernel_shape[1])
+        dkernel = np.moveaxis(dkernel, -1, 1)
 
         # Update gradient
         self.weight.grad = dkernel
