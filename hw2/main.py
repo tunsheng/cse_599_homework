@@ -18,10 +18,10 @@ class MNISTNetwork(Network):
     def __init__(self):
         self.layers = layers.SequentialLayer(
             [
-                layers.ConvLayer(1, 6, 5),
+                layers.ConvLayerProNumba(1, 6, 5),
                 layers.MaxPoolLayer(2, 2),
                 layers.ReLULayer(),
-                layers.ConvLayer(6, 16, 5),
+                layers.ConvLayerProNumba(6, 16, 5),
                 layers.MaxPoolLayer(2, 2),
                 layers.ReLULayer(),
                 layers.FlattenLayer(),
@@ -113,6 +113,5 @@ if __name__ == "__main__":
     test_data = test_dataset["data"].astype(np.float32) / 255
     test_data = test_data[:, np.newaxis, ...]
     test_labels = test_dataset["labels"]
-
     network = MNISTNetwork()
     train(train_data, train_labels, test_data, test_labels, network)

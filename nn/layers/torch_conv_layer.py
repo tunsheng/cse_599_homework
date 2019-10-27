@@ -24,14 +24,14 @@ class TorchConvLayer(Layer):
         self.output = None
 
     def forward(self, data):
-        self.weight_tensor = utils.from_numpy(self.weight.data.swapaxes(0, 1))
-        self.bias_tensor = utils.from_numpy(self.bias.data)
-        self.data = utils.from_numpy(data)
+        self.weight_tensor = utils.from_numpy(self.weight.data.swapaxes(0, 1)).double()
+        self.bias_tensor = utils.from_numpy(self.bias.data).double()
+        self.data = utils.from_numpy(data).double()
         self.output = F.conv2d(self.data, self.weight_tensor, self.bias_tensor, self.stride, self.padding)
         return utils.to_numpy(self.output)
 
     def backward(self, previous_partial_gradient):
-        gradients = utils.from_numpy(previous_partial_gradient)
+        gradients = utils.from_numpy(previous_partial_gradient).double()
         input_grad = grad.conv2d_input(self.data.shape, self.weight_tensor, gradients, self.stride, self.padding)
         weight_grad = grad.conv2d_weight(self.data, self.weight_tensor.shape, gradients, self.stride, self.padding)
         bias_grad = gradients.sum((0, 2, 3))
@@ -59,6 +59,3 @@ class TorchConvLayer(Layer):
             for param in self.own_parameters():
                 initializer(param)
         super(TorchConvLayer, self).initialize()
-
-
-
