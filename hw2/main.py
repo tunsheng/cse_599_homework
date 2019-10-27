@@ -18,10 +18,10 @@ class MNISTNetwork(Network):
     def __init__(self):
         self.layers = layers.SequentialLayer(
             [
-                layers.ConvLayerProNumba(1, 6, 5),
+                layers.ConvLayer(1, 6, 5),
                 layers.MaxPoolLayer(2, 2),
                 layers.ReLULayer(),
-                layers.ConvLayerProNumba(6, 16, 5),
+                layers.ConvLayer(6, 16, 5),
                 layers.MaxPoolLayer(2, 2),
                 layers.ReLULayer(),
                 layers.FlattenLayer(),

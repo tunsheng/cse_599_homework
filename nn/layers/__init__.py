@@ -12,7 +12,6 @@ from .relu_layer import ReLULayer, ReLUNumbaLayer
 from .sequential_layer import SequentialLayer
 from .torch_conv_layer import TorchConvLayer
 from .conv_layer_pro import ConvLayerPro
-from .conv_layer_pro_numba import ConvLayerProNumba
 __all__ = [
     "Layer",
     "DummyLayer",
@@ -29,5 +28,4 @@ __all__ = [
     "SequentialLayer",
     "TorchConvLayer",
     "ConvLayerPro",
-    "ConvLayerProNumba",
 ]

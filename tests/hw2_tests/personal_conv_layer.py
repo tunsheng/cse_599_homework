@@ -3,9 +3,9 @@ import numpy as np
 import torch
 from torch import nn
 
-from nn.layers.conv_layer import ConvLayer
-# from nn.layers import ConvLayerPro
-from nn.layers import ConvLayerProNumba as  ConvLayerPro
+# from nn.layers.conv_layer import ConvLayer as ConvLayerPro
+from nn.layers import ConvLayerPro
+# from nn.layers import ConvLayerProNumba as  ConvLayerPro
 from tests import utils
 
 TOLERANCE = 1e-4
@@ -33,28 +33,28 @@ def _test_conv_forward(input_shape, out_channels, kernel_size, stride):
     utils.assert_close(output, torch_out, atol=TOLERANCE)
 
 
-# def test_conv_forward_batch_input_output():
-#     width = 100
-#     height = 100
-#     kernel_size = 3
-#     stride = 1
-#     for batch_size in range(1, 5):
-#         for input_channels in range(1, 5):
-#             for output_channels in range(1, 5):
-#                 input_shape = (batch_size, input_channels, width, height)
-#                 _test_conv_forward(input_shape, output_channels, kernel_size, stride)
+def test_conv_forward_batch_input_output():
+    width = 100
+    height = 100
+    kernel_size = 3
+    stride = 1
+    for batch_size in range(1, 5):
+        for input_channels in range(1, 5):
+            for output_channels in range(1, 5):
+                input_shape = (batch_size, input_channels, width, height)
+                _test_conv_forward(input_shape, output_channels, kernel_size, stride)
 
 
-# def test_conv_forward_width_height_stride_kernel_size():
-#     batch_size = 2
-#     input_channels = 2
-#     output_channels = 3
-#     for width in range(10, 21):
-#         for height in range(10, 21):
-#             for stride in range(1, 3):
-#                 for kernel_size in range(stride, 6):
-#                     input_shape = (batch_size, input_channels, width, height)
-#                     _test_conv_forward(input_shape, output_channels, kernel_size, stride)
+def test_conv_forward_width_height_stride_kernel_size():
+    batch_size = 2
+    input_channels = 2
+    output_channels = 3
+    for width in range(10, 21):
+        for height in range(10, 21):
+            for stride in range(1, 3):
+                for kernel_size in range(stride, 6):
+                    input_shape = (batch_size, input_channels, width, height)
+                    _test_conv_forward(input_shape, output_channels, kernel_size, stride)
 
 
 def _test_conv_backward(input_shape, out_channels, kernel_size, stride):
@@ -91,13 +91,13 @@ def test_conv_backward_batch_input_output():
                 _test_conv_backward(input_shape, output_channels, kernel_size, stride)
 
 
-# def test_conv_backward_width_height_stride_kernel_size():
-#     batch_size = 2
-#     input_channels = 2
-#     output_channels = 3
-#     for width in range(10, 21):
-#         for height in range(10, 21):
-#             for stride in range(1, 3):
-#                 for kernel_size in range(stride, 6):
-#                     input_shape = (batch_size, input_channels, width, height)
-#                     _test_conv_backward(input_shape, output_channels, kernel_size, stride)
+def test_conv_backward_width_height_stride_kernel_size():
+    batch_size = 2
+    input_channels = 2
+    output_channels = 3
+    for width in range(10, 21):
+        for height in range(10, 21):
+            for stride in range(1, 3):
+                for kernel_size in range(stride, 6):
+                    input_shape = (batch_size, input_channels, width, height)
+                    _test_conv_backward(input_shape, output_channels, kernel_size, stride)
