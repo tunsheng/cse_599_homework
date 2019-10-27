@@ -20,6 +20,6 @@ class AddLayer(Layer):
     def backward(self, previous_partial_gradient) -> Tuple[np.ndarray, ...]:
         # TODO: You should return as many gradients as there were inputs.
         #   So for adding two tensors, you should return two gradient tensors corresponding to the
-        #   order they were in the input.
+        #   order they were in the input.i
         grad_list = [ previous_partial_gradient ] * self.n_inputs
         return tuple(grad_list)

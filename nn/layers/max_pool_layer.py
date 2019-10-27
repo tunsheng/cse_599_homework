@@ -13,6 +13,7 @@ class MaxPoolLayer(Layer):
         self.padding = (kernel_size - 1) // 2
         self.stride = stride
         self.padded_input = None
+        # self.grad = None
 
     @staticmethod
     @njit(parallel=True, cache=True)
@@ -87,8 +88,11 @@ class MaxPoolLayer(Layer):
          self.padded_input, filter_shape, padding, stride)
 
         if (padding>0):
+            # self.grad = dinput[:,:,padding:-padding,padding:-padding]
+
             return dinput[:,:,padding:-padding,padding:-padding]
         else:
+            # self.grad = dinput
             return dinput
 
     def selfstr(self):

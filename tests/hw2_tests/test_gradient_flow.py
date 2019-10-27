@@ -114,26 +114,50 @@ def test_networks():
     forward_torch = torch_net(data_torch)
 
     utils.assert_close(forward, forward_torch)
-
+    print("Passed forward")
     loss = net.loss(forward, labels)
     torch_loss = torch_net.loss(forward_torch, utils.from_numpy(labels))
 
     utils.assert_close(loss, torch_loss)
-
+    print("Passed loss")
     out_grad = net.backward()
     torch_loss.backward()
 
     utils.assert_close(out_grad, data_torch.grad, atol=0.01)
+    print("Passed grad")
+
+
+# 0 torch.nn.Conv2d(1, 6, 5, 1, 2),
+# 1 torch.nn.MaxPool2d(2, 2),
+# 2 torch.nn.ReLU(),
+# 3 torch.nn.Conv2d(6, 16, 5, 1, 2),
+# 4 TorchResNetBlock((16, 16, 3, 1, 1)),
+# 5 TorchResNetBlock((16, 16, 3, 1, 1)),
+# 6 torch.nn.MaxPool2d(2, 2),
+# 7 torch.nn.ReLU(),
+# 8 TorchFlattenLayer(),
+# 9 torch.nn.Linear(16 * 7 * 7, 120),
+# 10 torch.nn.ReLU(),
+# 11 torch.nn.Linear(120, 84),
+# 12 torch.nn.ReLU(),
+# 13 torch.nn.Linear(84, 10),
 
     tolerance = 1e-4
     utils.check_linear_grad_match(net.layers[13], torch_net.layers[13], tolerance=tolerance)
+    print("Passed 13")
     utils.check_linear_grad_match(net.layers[11], torch_net.layers[11], tolerance=tolerance)
+    print("Passed 11")
     utils.check_linear_grad_match(net.layers[9], torch_net.layers[9], tolerance=tolerance)
+    print("Passed 9 Linear")
     utils.check_conv_grad_match(net.layers[5].conv_layers[2], torch_net.layers[5].conv2, tolerance=tolerance)
+    print("Passed 5 conv 2")
     utils.check_conv_grad_match(net.layers[5].conv_layers[0], torch_net.layers[5].conv1, tolerance=tolerance)
+    print("Passed 5 conv 0")
     utils.check_conv_grad_match(net.layers[4].conv_layers[2], torch_net.layers[4].conv2, tolerance=tolerance)
+    print("Passed 4 conv 2")
     utils.check_conv_grad_match(net.layers[4].conv_layers[0], torch_net.layers[4].conv1, tolerance=tolerance)
+    print("Passed 4 conv 0")
     utils.check_conv_grad_match(net.layers[3], torch_net.layers[3], tolerance=tolerance)
+    print("Passed 3")
     utils.check_conv_grad_match(net.layers[0], torch_net.layers[0], tolerance=tolerance)
-
-
+    print("Passed 0")
