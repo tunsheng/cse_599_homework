@@ -9,9 +9,9 @@ from nn import layers
 from nn.layers import losses
 from nn.layers.block_layers import ResNetBlock
 from tests import utils
+from torch.autograd import Variable
 
-
-class MNISTResNetwork(Network):
+class Mynet(Network):
     def __init__(self):
         self.layers = layers.SequentialLayer(
             [
@@ -19,8 +19,6 @@ class MNISTResNetwork(Network):
                 layers.MaxPoolLayer(2, 2),
                 layers.ReLULayer(),
                 layers.ConvLayer(6, 16, 5),
-                ResNetBlock((16, 16, 3, 1)),
-                ResNetBlock((16, 16, 3, 1)),
                 layers.MaxPoolLayer(2, 2),
                 layers.ReLULayer(),
                 layers.FlattenLayer(),
@@ -32,14 +30,13 @@ class MNISTResNetwork(Network):
             ]
         )
         loss_layer = losses.SoftmaxCrossEntropyLossLayer(parent=self.layers)
-        super(MNISTResNetwork, self).__init__(loss_layer)
+        super(Mynet, self).__init__(loss_layer)
 
     def forward(self, data):
         return self.layers(data)
 
     def loss(self, predictions, labels):
         return self.loss_layer(predictions, labels)
-
 
 class TorchResNetBlock(torch.nn.Module):
     def __init__(self, shape):
@@ -56,23 +53,19 @@ class TorchResNetBlock(torch.nn.Module):
         data = F.relu(data)
         return data
 
-
 class TorchFlattenLayer(torch.nn.Module):
     def forward(self, data):
         return data.view(data.shape[0], -1)
 
-
-class TorchMNISTResNetwork(torch.nn.Module):
+class Total(torch.nn.Module):
     def __init__(self):
-        super(TorchMNISTResNetwork, self).__init__()
+        super(Total, self).__init__()
 
         self.layers = torch.nn.Sequential(
                 torch.nn.Conv2d(1, 6, 5, 1, 2),
                 torch.nn.MaxPool2d(2, 2),
                 torch.nn.ReLU(),
                 torch.nn.Conv2d(6, 16, 5, 1, 2),
-                TorchResNetBlock((16, 16, 3, 1, 1)),
-                TorchResNetBlock((16, 16, 3, 1, 1)),
                 torch.nn.MaxPool2d(2, 2),
                 torch.nn.ReLU(),
                 TorchFlattenLayer(),
@@ -90,58 +83,51 @@ class TorchMNISTResNetwork(torch.nn.Module):
         return F.cross_entropy(predictions, labels)
 
 
-def test_networks():
+def test_MNISTNetwork():
     np.random.seed(0)
     torch.manual_seed(0)
     data = np.random.random((100, 1, 28, 28)).astype(np.float32) * 10 - 5
     labels = np.random.randint(0, 10, 100).astype(np.int64)
 
-    net = MNISTResNetwork()
-    torch_net = TorchMNISTResNetwork()
+    net = Mynet()
+    torch_net = Total()
+
     utils.assign_conv_layer_weights(net.layers[0], torch_net.layers[0])
     utils.assign_conv_layer_weights(net.layers[3], torch_net.layers[3])
-    utils.assign_conv_layer_weights(net.layers[4].conv_layers[0], torch_net.layers[4].conv1)
-    utils.assign_conv_layer_weights(net.layers[4].conv_layers[2], torch_net.layers[4].conv2)
-    utils.assign_conv_layer_weights(net.layers[5].conv_layers[0], torch_net.layers[5].conv1)
-    utils.assign_conv_layer_weights(net.layers[5].conv_layers[2], torch_net.layers[5].conv2)
+    utils.assign_linear_layer_weights(net.layers[7], torch_net.layers[7])
     utils.assign_linear_layer_weights(net.layers[9], torch_net.layers[9])
     utils.assign_linear_layer_weights(net.layers[11], torch_net.layers[11])
-    utils.assign_linear_layer_weights(net.layers[13], torch_net.layers[13])
+
 
     forward = net(data)
 
-    data_torch = utils.from_numpy(data).requires_grad_(True)
-    forward_torch = torch_net(data_torch)
+    data0 = utils.from_numpy(data).requires_grad_(True)
+    torch_forward = torch_net(data0)
 
-    utils.assert_close(forward, forward_torch)
+    utils.assert_close(forward, torch_forward)
     print("Passed forward")
     loss = net.loss(forward, labels)
-    torch_loss = torch_net.loss(forward_torch, utils.from_numpy(labels))
-
+    torch_loss = torch_net.loss(torch_forward, utils.from_numpy(labels))
     utils.assert_close(loss, torch_loss)
     print("Passed loss")
+
     out_grad = net.backward()
     torch_loss.backward()
-
-    utils.assert_close(out_grad, data_torch.grad, atol=0.01)
+    utils.assert_close(out_grad, data0.grad, atol=0.01)
     print("Passed grad")
 
     tolerance = 1e-4
-    utils.check_linear_grad_match(net.layers[13], torch_net.layers[13], tolerance=tolerance)
-    print("Passed 13")
+    print("Checking ", net.layers[11], " gradient")
     utils.check_linear_grad_match(net.layers[11], torch_net.layers[11], tolerance=tolerance)
-    print("Passed 11")
+
+    print("Checking ", net.layers[9], " gradient")
     utils.check_linear_grad_match(net.layers[9], torch_net.layers[9], tolerance=tolerance)
-    print("Passed 9 Linear")
-    utils.check_conv_grad_match(net.layers[5].conv_layers[2], torch_net.layers[5].conv2, tolerance=tolerance)
-    print("Passed 5 conv 2")
-    utils.check_conv_grad_match(net.layers[5].conv_layers[0], torch_net.layers[5].conv1, tolerance=tolerance)
-    print("Passed 5 conv 0")
-    utils.check_conv_grad_match(net.layers[4].conv_layers[2], torch_net.layers[4].conv2, tolerance=tolerance)
-    print("Passed 4 conv 2")
-    utils.check_conv_grad_match(net.layers[4].conv_layers[0], torch_net.layers[4].conv1, tolerance=tolerance)
-    print("Passed 4 conv 0")
-    utils.check_conv_grad_match(net.layers[3], torch_net.layers[3], tolerance=tolerance)
-    print("Passed 3")
-    utils.check_conv_grad_match(net.layers[0], torch_net.layers[0], tolerance=tolerance)
-    print("Passed 0")
+
+    print("Checking ", net.layers[7], " gradient")
+    utils.check_linear_grad_match(net.layers[7], torch_net.layers[7], tolerance=tolerance)
+
+    print("Checking ", net.layers[3], " gradient")
+    utils.check_linear_grad_match(net.layers[3], torch_net.layers[3], tolerance=tolerance)
+
+    print("Checking ", net.layers[0], " gradient")
+    utils.check_linear_grad_match(net.layers[0], torch_net.layers[0], tolerance=tolerance)

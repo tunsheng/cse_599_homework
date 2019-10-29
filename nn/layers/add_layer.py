@@ -9,7 +9,7 @@ from .layer import Layer
 class AddLayer(Layer):
     def __init__(self, parents):
         super(AddLayer, self).__init__(parents)
-        self.n_inputs = 0
+        self.n_inputs = None
 
     def forward(self, inputs: Iterable):
         # TODO: Add all the items in inputs. Hint, python's sum() function may be of use.
