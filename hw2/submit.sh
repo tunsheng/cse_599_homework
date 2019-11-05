@@ -13,6 +13,7 @@ prepare ../nn/layers/conv_layer.py
 prepare ../nn/layers/flatten_layer.py
 prepare ../nn/layers/max_pool_layer.py
 prepare homework2_colab.ipynb
+prepare homework2_colab.pdf
 prepare weights.pt
 prepare short_answer.pdf
 prepare partners.txt

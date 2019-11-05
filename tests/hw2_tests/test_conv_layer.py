@@ -73,7 +73,9 @@ def _test_conv_backward(input_shape, out_channels, kernel_size, stride):
     torch_out = torch_layer(torch_input)
     (2 * torch_out.mean()).backward()
 
+    print("Test input grad")
     utils.assert_close(out_grad, torch_input.grad, atol=TOLERANCE)
+    print("test weight")
     utils.check_conv_grad_match(layer, torch_layer)
 
 
