@@ -51,6 +51,7 @@ class PReLULayer(Layer):
     def backward(self, previous_partial_gradient):
         # 5.2) TODO
         # Preprocessing
+        print(self.data.shape)
         slope_grad = np.zeros(self.data.shape[1])
         self.data = np.moveaxis(self.data, 1, -1)
         previous_partial_gradient = np.moveaxis(previous_partial_gradient, 1, -1)
@@ -74,10 +75,10 @@ class PReLULayer(Layer):
         slope_grad = np.sum(dL_dalpha, axis=-1)
 
         if len(self.slope.data) == 1:
-            self.slope.grad[0] = np.mean(slope_grad)
+            self.slope.grad[0] = np.sum(slope_grad)
         else:
             for i in range(flatten_shape[1]):
-                self.slope.grad[i] = slope_grad[i]
+                self.slope.grad[i] = slope_grad[i]/flatten_shape[1]
 
         # Deflate data and move axis back to orignal location
         output = self.deflat_dims(output, moveaxis_shape)
@@ -112,8 +113,6 @@ class PReLULayer(Layer):
         for i in range(len(output)):
             if (data[i] < 0):
                 output[i] *= slope
-            elif (data[i] == 0):
-                output[i] += -0.5
         output = output.reshape(shape)
         data = data.reshape(shape)
         return output

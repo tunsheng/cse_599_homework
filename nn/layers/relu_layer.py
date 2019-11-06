@@ -6,7 +6,8 @@ from .layer import Layer
 class ReLULayer(Layer):
     def __init__(self, parent=None):
         super(ReLULayer, self).__init__(parent)
-        self.relu = np.vectorize(lambda x: x * (x>0))
+        # Note: vectorization is too memory intensive
+        # self.relu = np.vectorize(lambda x: x * (x>0))
         # self.drelu = np.vectorize(lambda x: 1.0 * (x>0))
         self.input = None
 
@@ -15,12 +16,15 @@ class ReLULayer(Layer):
         # Element-wise function
         # Return f(in) shape = (n x d)
         self.input = data
-        return self.relu(data)
+        output = data
+        output[output<0] = 0
+
+        return output
 
     def backward(self, previous_partial_gradient):
         # TODO
         # new_grad = dy/df(in) * df(in)/d(in)
-        return previous_partial_gradient*(self.input >=0)
+        return previous_partial_gradient*(self.input > 0)
 
 class ReLUNumbaLayer(Layer):
     def __init__(self, parent=None):
@@ -56,7 +60,7 @@ class ReLUNumbaLayer(Layer):
         data = data.flatten()
         output = output.flatten()
         for i in prange(len(output)):
-            if (data[i]<0):
+            if (data[i] <= 0):
                 output[i]=0
         output = output.reshape(shape)
         data = data.reshape(shape)

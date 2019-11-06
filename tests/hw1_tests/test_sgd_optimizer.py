@@ -4,7 +4,7 @@ import torch
 import nn
 import nn.layers
 from nn.optimizers import sgd_optimizer
-from test import utils
+from tests import utils
 
 
 class TorchNet(torch.nn.Module):
@@ -29,9 +29,7 @@ def test_sgd_update():
     initial_bias = net.bias.data.copy()
 
     torch_net = TorchNet()
-    with torch.no_grad():
-        torch_net.layer.weight[:] = utils.from_numpy(net.weight.data.T)
-        torch_net.layer.bias[:] = utils.from_numpy(net.bias.data)
+    utils.assign_linear_layer_weights(net, torch_net.layer)
     torch_optimizer = torch.optim.SGD(torch_net.parameters(), learning_rate)
 
     optimizer.zero_grad()
@@ -41,20 +39,19 @@ def test_sgd_update():
 
     torch_optimizer.zero_grad()
     torch_out = torch_net(utils.from_numpy(data))
-    assert np.allclose(out, utils.to_numpy(torch_out.clone().detach()), atol=0.01)
+    utils.assert_close(out, utils.to_numpy(torch_out.clone().detach()), atol=0.01)
 
     torch_loss = torch_out.sum()
-    assert np.allclose(loss, torch_loss.item(), atol=0.01)
+    utils.assert_close(loss, torch_loss.item(), atol=0.01)
     torch_loss.backward()
 
-    assert np.allclose(net.weight.grad.T, utils.to_numpy(torch_net.layer.weight.grad))
-    assert np.allclose(net.bias.grad, utils.to_numpy(torch_net.layer.bias.grad))
+    utils.check_linear_grad_match(net, torch_net.layer)
 
     optimizer.step()
     torch_optimizer.step()
 
-    assert np.allclose(net.weight.data.T, utils.to_numpy(torch_net.layer.weight))
-    assert np.allclose(net.bias.data, utils.to_numpy(torch_net.layer.bias))
+    utils.assert_close(net.weight.data.T, utils.to_numpy(torch_net.layer.weight))
+    utils.assert_close(net.bias.data, utils.to_numpy(torch_net.layer.bias))
 
     assert not np.allclose(net.weight.data, initial_weight)
     assert not np.allclose(net.bias.data, initial_bias)
