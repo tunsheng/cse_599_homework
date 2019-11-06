@@ -26,25 +26,37 @@ class ConvLayer(Layer):
         """
         padding, p, stride = self.padding, self.padding, self.stride
         weight, bias = self.weight.data, self.bias.data
-        padded_data = np.pad(data, ((0,0),(0,0),(p,p),(p,p)),
-                        'constant',constant_values=(0))
+
+        # Note: pad is too memory intensive
+        # padded_data = np.pad(data, ((0,0),(0,0),(p,p),(p,p)),
+        #                 'constant',constant_values=(0))
         # To improve speed, reshape weight
         # kernel = np.moveaxis(self.weight.data, 1, 0)
-        output = self.forward_numba(padded_data, weight, bias, stride)
+        # output = self.forward_numba(padded_data, weight, bias, stride)
+        if p>0:
+            padded_data = np.zeros((data.shape[0], data.shape[1], data.shape[2]+2*p, data.shape[3]+2*p))
+            padded_data[:,:,p:-p,p:-p] = data
+        else:
+            padded_data = data
+        nimages, input_channels, padded_height, padded_width = padded_data.shape
+        input_channels, output_channels, filter_height, filter_width = weight.shape
+        output_height = int((padded_height-filter_height) // stride) + 1
+        output_width = int((padded_width-filter_width) // stride) + 1
+
+        output = np.zeros((nimages, output_channels, output_height, output_width))
+        self.forward_numba(padded_data, weight, bias, stride, output)
 
         self.cache = (padded_data)
         return output
 
     @staticmethod
     @njit(parallel=True, cache=True)
-    def forward_numba(padded_data, kernel, bias, stride):
+    def forward_numba(padded_data, kernel, bias, stride, output):
+        #  Note: numba return is slow for large objects
         nimages, input_channels, padded_height, padded_width = padded_data.shape
-        # output_channels, input_channels, filter_height, filter_width = kernel.shape
         input_channels, output_channels, filter_height, filter_width = kernel.shape
         output_height = int((padded_height-filter_height) // stride) + 1
         output_width = int((padded_width-filter_width) // stride) + 1
-
-        output = np.zeros((nimages, output_channels, output_height, output_width))
 
         for n in prange(nimages):
             for c in prange(output_channels):
@@ -57,16 +69,15 @@ class ConvLayer(Layer):
                                    sample_w = j*stride + kw
                                    patch = padded_data[n, cold, sample_h, sample_w]
                                    output[n, c, i, j] += patch*kernel[cold,c,kh,kw]+bias[c]
-        return output
+        return None
 
     @staticmethod
     @njit(cache=True, parallel=True)
-    def backward_numba(previous_grad, padded_data, kernel, padding, stride):
+    def backward_numba(previous_grad, padded_data, kernel, padding, stride, dinput, dkernel):
+        # Note: numba return is slow for large object
         nimages, output_channels, output_height, output_width = previous_grad.shape
         input_channels, output_channels, filter_height, filter_width = kernel.shape
 
-        dinput = np.zeros(padded_data.shape)
-        dkernel = np.zeros(kernel.shape)
         # Numba does not support slicing when accumulating
         for cold in prange(input_channels):
             for n in range(nimages):
@@ -80,7 +91,7 @@ class ConvLayer(Layer):
                                    dinput[n,cold,sample_h,sample_w]+=previous_grad[n,c,i,j]*kernel[cold,c,kh,kw]
                                    dkernel[cold,c,kh,kw] += padded_data[n,cold,sample_h,sample_w] * previous_grad[n,c,i,j]
 
-        return (dinput, dkernel)
+        return None
 
     def backward(self, previous_partial_gradient):
         padding, p = self.padding, self.padding
@@ -88,8 +99,12 @@ class ConvLayer(Layer):
         padded_data = self.cache
 
         # Backprop for convolution
-        dinput, dkernel = self.backward_numba(previous_partial_gradient,
-         padded_data, self.weight.data, padding, stride)
+        # dinput, dkernel = self.backward_numba(previous_partial_gradient,
+        #  padded_data, self.weight.data, padding, stride)
+        dinput = np.zeros(padded_data.shape)
+        dkernel = np.zeros(self.weight.data.shape)
+        self.backward_numba(previous_partial_gradient,
+         padded_data, self.weight.data, padding, stride, dinput, dkernel)
 
         # Using quick method
         db = np.sum(previous_partial_gradient, axis=(0, 2, 3))
