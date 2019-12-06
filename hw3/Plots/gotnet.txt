@@ -1,0 +1,31 @@
+generated with max	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with sample	 The dragon ate the castle of the castle Baratheon  and the commands of the boy was still and stranger every to the
+generated with sample	 The dragon ateven her head of the  black of the walls of the fire and the courtes of the countains of the crown of
+generated with sample	 The dragon ate him. "I am the same to pie  with the right of the courage to the stars. I was the same to go to the
+generated with sample	 The dragon ately the way the gods of the stone of the  stone of the castle of the lands of the red beard and a com
+generated with sample	 The dragon ate a little black of her breasts. As we did not have been  and beautiful to make him and stone and the
+generated with sample	 The dragon ate her brother and the first time the  stars with the good of the direwolf was a child of starts of th
+generated with sample	 The dragon ate him with a shadow of the  stone with the castle of the common of the dragons belly and her sister a
+generated with sample	 The dragon ate her with a stone and said, but he  was a bit of steel and see the stars and brown and slayed with a
+generated with sample	 The dragon ate him and like a breath and stone and stronger and  she was all at the streets of her face and starte
+generated with sample	 The dragon ates and stood and stepped and sleep and stronger to his song.  The other stone was back and stood and 
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+generated with beam	 The dragon ate his sister and the streets of the  stone of the courtes of the steps of the steps of the steps of t
+
+GotNet(
+  (encoder): Embedding(96, 512)
+  (gru): GRU(512, 512, batch_first=True)
+  (decoder): Linear(in_features=512, out_features=96, bias=True)
+)
+
+
+Epoch 90
+Test set: Average loss: 1.4971, Accuracy: 1054034/1894400 (56%), Average perplexity: 5.7608

@@ -1,0 +1,32 @@
+generated with max	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with sample	 Spells casted by the man who had been surprised to the back of the ward of the air and started to the stairs and the back of the stairs stopped on the stairs and a surprise of the way the starts of the time he had be
+generated with sample	 Spells casted by the table to the castle and the way that he had not been the boy and the way to have heard the corridor of the control of the dark and said to the common room had been been to the water that the star
+generated with sample	 Spells casted by the corridor to the prophecy of the stairs and straight the stairs and started to the fire last the parchment that he was all the side of the point of the way of the door and the stairs that he was s
+generated with sample	 Spells casted by the first thing that had been been to be a bottom of the body of the stairs and waiting to the back of the corridor of the witch of the corner of the castle and started to start on the stairs and sta
+generated with sample	 Spells casted by the sight of the present that he had been the best of the coon and the corridor of the stairs shoulder and looked at the shoulder. "What was a moment of it?" said Harry and her face with his face was
+generated with sample	 Spells casted bye the table when he had not been a little beard was a moment and the stairs was still staring at the fire and the stairs for the corridor was staring at the silence of the cloak of the castle. He was 
+generated with sample	 Spells casted by the basin staring at the first time and said and started to the foot of the shadow of the rest of the stairs started and started to be a long table and saw that he was not to be able to be anything a
+generated with sample	 Spells casted by a long stone staircase and started to his bed and said in a sort of the castle and said and started to be a sign of his books and staring at the patch of contrary and shaked in a corner of the trees 
+generated with sample	 Spells casted byrown and started to him and started to his face. "I don't know what you were the beard of the other way the man who had been in the other way and going to be able to the place of a bark of it in the b
+generated with sample	 Spells casted by the stairs and said in a large part of the first time he had been a little point of the stairs to the stairs staring at the back to the stairs of the hall and shouted at the next to the end of the ca
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+generated with beam	 Spells casted by the stairs and the stairs was a start of the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to the stairs and started to th
+
+HarryPotterNet(
+  (encoder): Embedding(95, 512)
+  (gru): GRU(512, 1024, batch_first=True)
+  (decoder): Linear(in_features=1024, out_features=95, bias=True)
+)
+
+
+
+Epoch 50
+Test set: Average loss: 1.4583, Accuracy: 729142/1280000 (57%), Average perplexity: 5.2306

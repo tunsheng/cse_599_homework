@@ -1,0 +1,31 @@
+generated with max	 The dragon atead the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the s
+generated with sample	 The dragon atead the first of the steel and closed the stard on the stalls.  The gods was the direwolf stone and s
+generated with sample	 The dragon atever the black of the  starts of the black of the great silent ships of the stars. The fire was the l
+generated with sample	 The dragon ated the stark of the chance of the steel of the starl of the  dragons and shouted and brought the blac
+generated with sample	 The dragon aternated the store the walls of the black  and and her for and stones and still believed the cloak and
+generated with sample	 The dragon ateld the real  father to the stone with the dark and suddenly the stark of the stard and shoulders of 
+generated with sample	 The dragon atead her back. "He was a lady to the castle of the  man of the door when the steel had been the first 
+generated with sample	 The dragon ateptace.  The wind was not a crow when he stupid the castle of the courtest of the gods and the  crown
+generated with sample	 The dragon ate the stall of the starks of the wind with the drowned  with the black of the river candless and swor
+generated with sample	 The dragon ated the steel that he was a strong to the black of the other brother  and she was a start of his fathe
+generated with sample	 The dragon ate the stark of the girl and she was a little sword of the black  candles with a stark to the stark of
+generated with beam	 The dragon ate the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the sta
+generated with beam	 The dragon ate the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the sta
+generated with beam	 The dragon ate the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the sta
+generated with beam	 The dragon ate the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the sta
+generated with beam	 The dragon ate the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the sta
+generated with beam	 The dragon atead the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the s
+generated with beam	 The dragon ate the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the sta
+generated with beam	 The dragon ate the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the sta
+generated with beam	 The dragon ate the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the sta
+generated with beam	 The dragon atead the stark of the stark of the stark of the  stone of the stark of the stark of the stark of the s
+
+GotLSTMNet(
+  (encoder): Embedding(96, 700)
+  (lstm): LSTM(700, 700, batch_first=True)
+  (decoder): Linear(in_features=700, out_features=96, bias=True)
+)
+
+
+Epoch 20
+Test set: Average loss: 1.5123, Accuracy: 1044267/1894400 (55%), Average perplexity: 5.2117

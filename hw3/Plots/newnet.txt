@@ -1,0 +1,36 @@
+generated with max	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with sample	 The white dragon ate the battle of the walls of the shadows of the  cold grey arms and strong and strong the shadows and
+generated with sample	 The white dragon ate the trees of the boy and the shores of the sea of the  color of the three portcullis. The sea of th
+generated with sample	 The white dragon ate, and the last of the way a third that was a great stone  thousand stone while the fire was still an
+generated with sample	 The white dragon ate a side, and the boy was still a doublet of many silver and  strong and the captains of the way the 
+generated with sample	 The white dragon ate his lips.  The boy was still a sword of the hall of a late with the wall of the bed strong and stro
+generated with sample	 The white dragon ate a strange and stood of the steps of the eldest steel of the  stone room and closed the steel of the
+generated with sample	 The white dragon ate his head and she was all and some shield on the fire in the  stone of the steps of the earth of the
+generated with sample	 The white dragon ate a stone thing and the shadows and the steps and the  poor red stone was still and strong and strong
+generated with sample	 The white dragon ate the stone of the same the stone  serving was strong beneath the darkness of the room. The sea was s
+generated with sample	 The white dragon ate the door, and the old man was a brother of the Trident of the  sea. Arya still be stripping to the 
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+generated with beam	 The white dragon ate his head.  "I was a strong to the sea, and the sea of the sea of the way the streets of the sea. Th
+
+GotNewNet(
+  (encoder): Embedding(96, 512)
+  (gru): GRU(512, 512, num_layers=4, batch_first=True)
+  (decoder_1): Linear(in_features=512, out_features=256, bias=True)
+  (decoder_2): Linear(in_features=256, out_features=96, bias=True)
+  (batchnorm_0): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (batchnorm_1): BatchNorm1d(512, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (batchnorm_2): BatchNorm1d(256, eps=1e-05, momentum=0.1, affine=True, track_running_stats=True)
+  (relu): ReLU()
+)
+
+
+Epoch 60
+Test set: Average loss: 1.3880, Accuracy: 1114564/1894400 (59%), Average perplexity: 6.1671
